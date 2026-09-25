@@ -17,7 +17,8 @@ Configure these GitHub Actions values:
 - Variable `AFFINE_BASE_URL`
 - Variable `AFFINE_WORKSPACE_ID`
 - Variable `AFFINE_ROOT_DOCUMENT_ID`
-- Secret `AFFINE_API_TOKEN`
+- Secret `AFFINE_EMAIL` — dedicated AFFiNE service-account email
+- Secret `AFFINE_PASSWORD` — dedicated AFFiNE service-account password
 
 This repository exports workspace `82dbcbba-c52a-4539-be3f-133ea6ebcb9d`
 from root document `j4IXQ9l6wz` (`Shared Architecture — Start Here`).
