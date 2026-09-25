@@ -30,7 +30,7 @@
     {
       "id": "j4IXQ9l6wz",
       "path": "overview.md",
-      "revision": "4dabe657d21b836b7fc4842f9e5923efbc97f07122818161b7a94556024007af",
+      "revision": "90bfa88c3af7604413b2472d556b010cede935db64258533bf2c6c7d4cc07e6a",
       "sha256": "4fd3363c91cda0b1db5412cdcdce5b140ffa17eeb782a047b5542b38b4e96c20",
       "skill": false,
       "title": "Shared Architecture — Start Here",
@@ -66,8 +66,8 @@
     {
       "id": "pULFwF62YI",
       "path": "skill-installation-guide.md",
-      "revision": "584e2288c9dafd737c867c32894af8d6d188d5c6274fa1ffd4461ad399f795b7",
-      "sha256": "2d70103dc2fade34c5519e7762b3d8c49766f813c527e0a8fd52e2450c7de86f",
+      "revision": "5785aade430a11414512253def44d86a2acd932d1a9598766dab50f7fb749325",
+      "sha256": "158331166bdd63fbf303bc4be11fd0e3d1f604338fbb69a52f83663f6454ee38",
       "skill": false,
       "title": "Skill Installation Guide",
       "updatedAt": null

@@ -61,13 +61,15 @@ Use the generated Cursor marketplace in `.cursor-plugin/marketplace.json`, or co
 
 ## Devin
 
-Install a generated plugin directly from its repository subdirectory:
+Install the complete generated collection from the repository root:
 
 ``` bash
-devin plugins install Dragonshorn-Studios/shiori-brain#plugins/shiori-agent-engineering-contract
+devin plugins install Dragonshorn-Studios/shiori-brain
 ```
 
-Replace the final directory with another package from `plugins/`. For repository-managed cloud sessions, committing `.devin/skills/` to the application is the simplest deterministic option.
+The root `.devin-plugin/plugin.json` installs each generated package from its `plugins/shiori-*` subdirectory. If Devin already shows a failed partial installation, uninstall that entry before retrying the root collection.
+
+For repository-managed cloud sessions, committing `.devin/skills/` to the application remains the simplest deterministic fallback.
 
 ## Windsurf and Vibe
 

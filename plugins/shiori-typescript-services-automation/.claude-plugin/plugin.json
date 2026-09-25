@@ -4,5 +4,6 @@
   },
   "description": "AFFiNE-sourced Agent Skill for TypeScript Services & Automation.",
   "name": "shiori-typescript-services-automation",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "version": "1.0.0"
 }

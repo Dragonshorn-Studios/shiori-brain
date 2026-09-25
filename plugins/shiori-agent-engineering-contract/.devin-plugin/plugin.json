@@ -10,5 +10,6 @@
   ],
   "license": "MIT",
   "name": "shiori-agent-engineering-contract",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "version": "1.0.0"
 }

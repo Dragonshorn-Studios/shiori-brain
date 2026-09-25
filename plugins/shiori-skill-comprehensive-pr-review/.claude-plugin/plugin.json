@@ -4,5 +4,6 @@
   },
   "description": "AFFiNE-sourced Agent Skill for Skill — Comprehensive PR Review.",
   "name": "shiori-skill-comprehensive-pr-review",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "version": "1.0.0"
 }

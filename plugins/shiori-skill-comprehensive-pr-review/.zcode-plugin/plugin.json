@@ -10,6 +10,7 @@
   ],
   "license": "MIT",
   "name": "shiori-skill-comprehensive-pr-review",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "skills": "skills",
   "version": "1.0.0"
 }
