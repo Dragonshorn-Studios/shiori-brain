@@ -4,5 +4,6 @@
   },
   "description": "AFFiNE-sourced Agent Skill for Python Services & MCP Apps.",
   "name": "shiori-python-services-mcp-apps",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "version": "1.0.0"
 }

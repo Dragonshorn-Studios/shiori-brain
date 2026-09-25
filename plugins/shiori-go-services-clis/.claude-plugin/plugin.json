@@ -4,5 +4,6 @@
   },
   "description": "AFFiNE-sourced Agent Skill for Go Services & CLIs.",
   "name": "shiori-go-services-clis",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "version": "1.0.0"
 }

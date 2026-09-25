@@ -10,5 +10,6 @@
   ],
   "license": "MIT",
   "name": "shiori-python-services-mcp-apps",
+  "repository": "https://github.com/Dragonshorn-Studios/shiori-brain",
   "version": "1.0.0"
 }
