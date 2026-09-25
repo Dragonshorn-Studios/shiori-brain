@@ -1,0 +1,14 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Go Services & CLIs.",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-go-services-clis",
+  "version": "1.0.0"
+}

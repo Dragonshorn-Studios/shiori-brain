@@ -1,0 +1,50 @@
+---
+layout: default
+title: "Agent Engineering Contract"
+shiori_source_id: "beRj-vMOMy"
+---
+
+# Agent Engineering Contract
+
+Shared baseline for coding agents working in Dragonshorn Studios repositories.
+
+## Precedence
+1. The current user request.
+1. Repository-local `AGENTS.md`, `.ai/rules/`, README and CI configuration.
+1. This shared contract.
+1. General ecosystem conventions.
+
+When rules disagree, follow the higher level and report the conflict. Never create a second tool-specific instruction file when the repository declares `AGENTS.md` canonical.
+
+## Before changing code
+- Read the repository instructions and the files surrounding the change.
+- Inspect installed versions before choosing an API or package feature.
+- Identify the product boundary, non-goals, trust boundaries and acceptance criteria.
+- Reuse existing components, naming and directory conventions.
+- Keep the change within the requested scope. Record unrelated findings instead of folding them into the diff.
+- Do not add dependencies, new top-level directories or infrastructure without explicit approval.
+
+## Implementation rules
+- Prefer simple, explicit and deterministic behavior.
+- Make state transitions and failure paths visible.
+- Validate external input at the boundary and fail closed.
+- Keep secrets out of source, logs, generated output, URLs and screenshots.
+- Use exact revisions or checkpoints for reproducible background work.
+- Make retryable work idempotent and bound concurrency.
+- Keep interfaces close to their consumers.
+- Write comments for intent and constraints, not a narration of the code.
+
+## Mutations and automation
+- Separate observation and proposal from mutation.
+- Consequential external changes require an explicit contract and, where the product expects it, human approval.
+- Never invent permissions, silently broaden scope, auto-merge, force-push or destroy state.
+- Prefer worktrees or other isolated checkouts for concurrent work.
+- Preserve user changes and never clean or rewrite unrelated work.
+
+## Completion
+
+A change is complete only when:
+- behavior and failure paths are covered at the level appropriate to the repository;
+- relevant formatting, linting, type checks, tests and build checks pass;
+- documentation or durable repository rules are updated when the change creates a lasting convention;
+- the final report names what changed, what was verified and any remaining risk.

@@ -1,0 +1,8 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Skill — Stacked PR Workflow.",
+  "name": "shiori-skill-stacked-pr-workflow",
+  "version": "1.0.0"
+}
