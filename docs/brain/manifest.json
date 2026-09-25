@@ -1,0 +1,105 @@
+{
+  "documents": [
+    {
+      "id": "beRj-vMOMy",
+      "path": "agent-engineering-contract.md",
+      "revision": "cf1f52a70165e74df49677c28e60d9bfc9db441e9ffb52a18f446be2cd471c5f",
+      "sha256": "067d1e390086fb6dfc2b8fa101e8024c3c1559d5a85c6ad1d077428b62ed3888",
+      "skill": true,
+      "title": "Agent Engineering Contract",
+      "updatedAt": null
+    },
+    {
+      "id": "5m9JCEM8kW",
+      "path": "go-services-clis.md",
+      "revision": "6dde83de1620b5e890154f5b1bc36a74daddf8f714c58ce2d5cecdf6a8c57e59",
+      "sha256": "a242ae6a2647f8eaf349604a33662620b92ec73eb2f5b3cb01787dfac7ce627b",
+      "skill": true,
+      "title": "Go Services & CLIs",
+      "updatedAt": null
+    },
+    {
+      "id": "D0XZ3Q7LJQ",
+      "path": "laravel-php-applications.md",
+      "revision": "8c89b498c83225fcc1d299e58495b0f1f0b03f79dc7622e792e945f56a78bf9d",
+      "sha256": "091c31bf99e6d7600d6aa8ed1a8afca82faead528bc21f020d9e79c2ca91e69b",
+      "skill": true,
+      "title": "Laravel & PHP Applications",
+      "updatedAt": null
+    },
+    {
+      "id": "j4IXQ9l6wz",
+      "path": "overview.md",
+      "revision": "39b0ad994869dd9fb76dd47ac10a03fbd3a886a0130922f56daaa1b284a7a785",
+      "sha256": "8360ab1976389e82e0076284e7ea93629e9712d6f31c1bbba12fd63ef7d8d61f",
+      "skill": false,
+      "title": "Shared Architecture — Start Here",
+      "updatedAt": null
+    },
+    {
+      "id": "u9ydl457Du",
+      "path": "python-services-mcp-apps.md",
+      "revision": "9d7bd3a7b09edc3e0fba6b5218c4e39e9274d7de70e50de950139c0d812be5dc",
+      "sha256": "1de051570ee20259df8bd4891866f26f008889bf09b08f31dc330f077096319e",
+      "skill": true,
+      "title": "Python Services & MCP Apps",
+      "updatedAt": null
+    },
+    {
+      "id": "qwe7oRtmJp",
+      "path": "security-trust-boundaries-human-approval.md",
+      "revision": "057b5629c0a47ece08047fd4ba7a422c35a8f52eb1695ded6b1c80d253cbcb8e",
+      "sha256": "cc3440a2a4c6b18a3aa5aa3be2d4de6f0b692f70fa366b741206620a20bc34b1",
+      "skill": true,
+      "title": "Security, Trust Boundaries & Human Approval",
+      "updatedAt": null
+    },
+    {
+      "id": "z7IgB0vfO1",
+      "path": "skill-comprehensive-pr-review.md",
+      "revision": "8800555dc4e9cc17e3818439c877a662a124b6dba86b74800936d61c9553c7f6",
+      "sha256": "f8d2deb5d72e092ad6e0abb91d1bb65c1826c44bfd9e854995312d5eeed31e8f",
+      "skill": true,
+      "title": "Skill — Comprehensive PR Review",
+      "updatedAt": null
+    },
+    {
+      "id": "zUln8DRF4P",
+      "path": "skill-stacked-pr-workflow.md",
+      "revision": "69084b102427bce179c869eb0d06b1d354d27470c8ab075bed7985933acaa15e",
+      "sha256": "afae262ee9e60c1506b99a9a50cc55dece7cb55a8d2c71c0694dfa7d9e9ea951",
+      "skill": true,
+      "title": "Skill — Stacked PR Workflow",
+      "updatedAt": null
+    },
+    {
+      "id": "0-2oPGQCfe",
+      "path": "testing-review-delivery.md",
+      "revision": "bf113d1043e061db6d06694d3e0109ea0c461a368cf9b43cef01f11f7eb05cc8",
+      "sha256": "d61bf4b6e86bc16330cd4e699741ab1719be1aba24a5028781a642de8464656f",
+      "skill": true,
+      "title": "Testing, Review & Delivery",
+      "updatedAt": null
+    },
+    {
+      "id": "GjUoG9ePZ5",
+      "path": "typescript-services-automation.md",
+      "revision": "25e9bd2adb494324ddb5e2aa404acc17cf73f989b5ef84c302b33789a60c1758",
+      "sha256": "dc826c4399c68d6460aa871395b86723bad7fbd6e14f3f0fd71278c754fa73fc",
+      "skill": true,
+      "title": "TypeScript Services & Automation",
+      "updatedAt": null
+    }
+  ],
+  "generator": "shiori",
+  "schemaVersion": 1,
+  "source": {
+    "baseUrl": "https://affine.dragonshorn.cloud",
+    "rootDocumentId": "j4IXQ9l6wz",
+    "skillIconProperty": "shiori-icon",
+    "skillTag": "skill",
+    "traversal": "same-workspace-links",
+    "type": "affine",
+    "workspaceId": "82dbcbba-c52a-4539-be3f-133ea6ebcb9d"
+  }
+}

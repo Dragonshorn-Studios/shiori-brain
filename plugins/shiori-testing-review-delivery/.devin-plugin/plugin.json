@@ -1,0 +1,14 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Testing, Review & Delivery.",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-testing-review-delivery",
+  "version": "1.0.0"
+}

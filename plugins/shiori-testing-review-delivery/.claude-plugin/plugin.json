@@ -1,0 +1,8 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Testing, Review & Delivery.",
+  "name": "shiori-testing-review-delivery",
+  "version": "1.0.0"
+}

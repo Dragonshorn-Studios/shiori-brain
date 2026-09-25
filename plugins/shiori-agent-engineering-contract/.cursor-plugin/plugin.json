@@ -1,0 +1,15 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Agent Engineering Contract.",
+  "displayName": "Shiori: Agent Engineering Contract",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-agent-engineering-contract",
+  "version": "1.0.0"
+}

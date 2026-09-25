@@ -1,0 +1,21 @@
+- title: "Shared Architecture — Start Here"
+  url: /brain/overview.html
+  children:
+    - title: "Agent Engineering Contract"
+      url: /brain/agent-engineering-contract.html
+    - title: "Security, Trust Boundaries & Human Approval"
+      url: /brain/security-trust-boundaries-human-approval.html
+    - title: "Testing, Review & Delivery"
+      url: /brain/testing-review-delivery.html
+    - title: "Laravel & PHP Applications"
+      url: /brain/laravel-php-applications.html
+    - title: "Go Services & CLIs"
+      url: /brain/go-services-clis.html
+    - title: "TypeScript Services & Automation"
+      url: /brain/typescript-services-automation.html
+    - title: "Python Services & MCP Apps"
+      url: /brain/python-services-mcp-apps.html
+    - title: "Skill — Stacked PR Workflow"
+      url: /brain/skill-stacked-pr-workflow.html
+    - title: "Skill — Comprehensive PR Review"
+      url: /brain/skill-comprehensive-pr-review.html

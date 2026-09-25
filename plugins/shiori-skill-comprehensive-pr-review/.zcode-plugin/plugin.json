@@ -1,0 +1,15 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Skill — Comprehensive PR Review.",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-skill-comprehensive-pr-review",
+  "skills": "skills",
+  "version": "1.0.0"
+}

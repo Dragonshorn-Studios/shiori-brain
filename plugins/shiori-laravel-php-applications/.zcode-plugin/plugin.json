@@ -1,0 +1,15 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Laravel & PHP Applications.",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-laravel-php-applications",
+  "skills": "skills",
+  "version": "1.0.0"
+}

@@ -1,0 +1,15 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Python Services & MCP Apps.",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-python-services-mcp-apps",
+  "skills": "skills",
+  "version": "1.0.0"
+}

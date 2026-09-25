@@ -1,0 +1,14 @@
+{
+  "author": {
+    "name": "Shiori"
+  },
+  "description": "AFFiNE-sourced Agent Skill for Security, Trust Boundaries & Human Approval.",
+  "keywords": [
+    "shiori",
+    "affine",
+    "project-knowledge"
+  ],
+  "license": "MIT",
+  "name": "shiori-security-trust-boundaries-human-approval",
+  "version": "1.0.0"
+}

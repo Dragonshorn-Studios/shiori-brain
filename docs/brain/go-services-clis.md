@@ -1,0 +1,39 @@
+---
+layout: default
+title: "Go Services & CLIs"
+shiori_source_id: "5m9JCEM8kW"
+---
+
+# Go Services & CLIs
+
+Shared guidance derived from Alyssa, Yukariko and related Dragonshorn Go repositories.
+
+## Architecture
+- Treat the repository's `AGENTS.md` as canonical.
+- Respect declared product fences and non-goals.
+- Prefer the standard library and a small dependency surface.
+- Define interfaces at the consumer, not in a speculative shared package.
+- Keep packages cohesive and avoid generic utility packages without a concrete owner.
+- Use explicit state machines for workflows whose transitions matter.
+
+## Execution and safety
+- Pass commands as argument arrays. Do not introduce an implicit shell where direct process execution works.
+- Validate configuration strictly at startup.
+- Store secret references, not secret values; redact credentials and sensitive URLs.
+- Destructive automation must fail closed and must not auto-restart, roll back, delete or rewrite state unless that behavior is part of an explicit contract.
+- Observe before mutating and surface enough context for an operator to decide.
+- Use structured logging with `log/slog` when consistent with the repository.
+- Keep text UTF-8 without BOM.
+
+## Git and delivery
+- Use isolated worktrees for parallel changes when appropriate.
+- Prefer fast-forward or ordinary merge flows required by the repository.
+- Never use `git reset --hard`, force-push or history rewriting without explicit user authorization.
+- Build the actual command binaries affected by the change, including cross-compilation when CI requires it.
+
+## Tests
+- Use table-driven tests for input matrices and edge cases.
+- Fake host dependencies; unit tests must not require live Docker, Git hosting or external services.
+- Test failure and cancellation paths, not only the happy path.
+- Run `go test ./...`, `go vet ./...` and, where the project supports it, `go test -race ./...`.
+- Keep filesystem and subprocess tests isolated in temporary directories.
