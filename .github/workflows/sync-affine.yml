@@ -15,11 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: stable
-
-      - uses: Dragonshorn-Studios/shiori-github-action@v1.0.1
+      - uses: Dragonshorn-Studios/shiori-github-action@v1.1.0
         with:
           affine-base-url: ${{ vars.AFFINE_BASE_URL }}
           affine-email: ${{ secrets.AFFINE_EMAIL }}
