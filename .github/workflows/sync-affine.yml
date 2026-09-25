@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Dragonshorn-Studios/shiori-github-action@v1.1.2
+      - uses: Dragonshorn-Studios/shiori-github-action@v1.1.3
         with:
           affine-base-url: ${{ vars.AFFINE_BASE_URL }}
           affine-email: ${{ secrets.AFFINE_EMAIL }}
@@ -25,6 +25,7 @@ jobs:
           skill-tag: skill
           skill-icon-property: shiori-icon
           marketplace-name: dragonshorn-brain
+          repository: Dragonshorn-Studios/shiori-brain
 
       - uses: peter-evans/create-pull-request@v7
         with:
