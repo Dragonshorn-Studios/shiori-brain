@@ -30,8 +30,8 @@
     {
       "id": "j4IXQ9l6wz",
       "path": "overview.md",
-      "revision": "39b0ad994869dd9fb76dd47ac10a03fbd3a886a0130922f56daaa1b284a7a785",
-      "sha256": "8360ab1976389e82e0076284e7ea93629e9712d6f31c1bbba12fd63ef7d8d61f",
+      "revision": "4dabe657d21b836b7fc4842f9e5923efbc97f07122818161b7a94556024007af",
+      "sha256": "4fd3363c91cda0b1db5412cdcdce5b140ffa17eeb782a047b5542b38b4e96c20",
       "skill": false,
       "title": "Shared Architecture — Start Here",
       "updatedAt": null
@@ -57,17 +57,26 @@
     {
       "id": "z7IgB0vfO1",
       "path": "skill-comprehensive-pr-review.md",
-      "revision": "8800555dc4e9cc17e3818439c877a662a124b6dba86b74800936d61c9553c7f6",
-      "sha256": "f8d2deb5d72e092ad6e0abb91d1bb65c1826c44bfd9e854995312d5eeed31e8f",
+      "revision": "3591bcc28691b6907c3cdbeb32a774a7983d2fb311af953670c81f137a6c5cc4",
+      "sha256": "16b5931583cea7e871963e62961781a85e46f4f5b37745807d068698d5403e24",
       "skill": true,
       "title": "Skill — Comprehensive PR Review",
       "updatedAt": null
     },
     {
+      "id": "pULFwF62YI",
+      "path": "skill-installation-guide.md",
+      "revision": "584e2288c9dafd737c867c32894af8d6d188d5c6274fa1ffd4461ad399f795b7",
+      "sha256": "2d70103dc2fade34c5519e7762b3d8c49766f813c527e0a8fd52e2450c7de86f",
+      "skill": false,
+      "title": "Skill Installation Guide",
+      "updatedAt": null
+    },
+    {
       "id": "zUln8DRF4P",
       "path": "skill-stacked-pr-workflow.md",
-      "revision": "69084b102427bce179c869eb0d06b1d354d27470c8ab075bed7985933acaa15e",
-      "sha256": "afae262ee9e60c1506b99a9a50cc55dece7cb55a8d2c71c0694dfa7d9e9ea951",
+      "revision": "785b6585ef2877b79635977d058c03deb720bd443eab4e62d2c37cbaa53884f5",
+      "sha256": "fd5f434078dfc8cc2fe04a885e519bf6f97b9c1e7ad4781a3cd0abe9197ced51",
       "skill": true,
       "title": "Skill — Stacked PR Workflow",
       "updatedAt": null

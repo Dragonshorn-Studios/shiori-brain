@@ -25,6 +25,9 @@ AFFiNE is the source of truth. Shiori exports only this document and same-worksp
 - [Skill — Stacked PR Workflow](skill-stacked-pr-workflow.md))
 - [Skill — Comprehensive PR Review](skill-comprehensive-pr-review.md))
 
+## Installation
+- [Skill Installation Guide](skill-installation-guide.md))
+
 ## Publishing contract
 
 Documents tagged `skill` are emitted as installable skills for Codex-compatible agents, Claude Code, Cursor, Windsurf, Vibe, Devin and ZCode. Keep private or unfinished notes outside this linked graph.
