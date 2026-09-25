@@ -4,8 +4,6 @@ title: "Skill — Comprehensive PR Review"
 shiori_source_id: "z7IgB0vfO1"
 ---
 
-> Source: [Rughalt/coding-agent-plugins](https://github.com/Rughalt/coding-agent-plugins)
-
 > Comprehensive PR review using specialized agents. Use when asked to review a PR, check changes before committing, or audit code quality. Optionally takes review aspects (comments, tests, errors, types, code, simplify, all).
 
 # Comprehensive PR Review
@@ -56,13 +54,13 @@ Run a comprehensive pull request review using multiple specialized agents, each 
 
 **Full review (default):**
 
-``` txt
+```
 /pr-review-toolkit:review-pr
 ```
 
 **Specific aspects:**
 
-``` txt
+```
 /pr-review-toolkit:review-pr tests errors
 # Reviews only test coverage and error handling
 
@@ -75,7 +73,7 @@ Run a comprehensive pull request review using multiple specialized agents, each 
 
 **Parallel review:**
 
-``` txt
+```
 /pr-review-toolkit:review-pr all parallel
 # Launches all agents in parallel
 ```
@@ -124,7 +122,7 @@ Run a comprehensive pull request review using multiple specialized agents, each 
 
 **Before committing:**
 
-``` txt
+```
 1. Write code
 2. Run: /pr-review-toolkit:review-pr code errors
 3. Fix any critical issues
@@ -133,7 +131,7 @@ Run a comprehensive pull request review using multiple specialized agents, each 
 
 **Before creating PR:**
 
-``` txt
+```
 1. Stage all changes
 2. Run: /pr-review-toolkit:review-pr all
 3. Address all critical and important issues
@@ -143,7 +141,7 @@ Run a comprehensive pull request review using multiple specialized agents, each 
 
 **After PR feedback:**
 
-``` txt
+```
 1. Make requested changes
 2. Run targeted reviews based on feedback
 3. Verify issues are resolved

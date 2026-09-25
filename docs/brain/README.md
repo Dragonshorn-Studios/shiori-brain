@@ -21,3 +21,4 @@ Start with [Shared Architecture — Start Here](overview.md).
   - [Python Services & MCP Apps](python-services-mcp-apps.md)
   - [Skill — Stacked PR Workflow](skill-stacked-pr-workflow.md)
   - [Skill — Comprehensive PR Review](skill-comprehensive-pr-review.md)
+  - [Skill Installation Guide](skill-installation-guide.md)

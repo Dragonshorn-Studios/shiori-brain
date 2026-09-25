@@ -4,8 +4,6 @@ title: "Skill — Stacked PR Workflow"
 shiori_source_id: "zUln8DRF4P"
 ---
 
-> Source: [Rughalt/coding-agent-plugins](https://github.com/Rughalt/coding-agent-plugins)
-
 > Implements a list of issues as a stack of dependent PRs. Plans the stack, then for each issue implements, reviews sequentially until clean, opens a PR, monitors CI, and moves to the next. Ends with a report and offers to file deferred low-severity findings as follow-up tickets. Arguments are issue numbers/URLs or a gh issue filter.
 
 # Stacked PR Workflow
