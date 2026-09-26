@@ -19,5 +19,17 @@
       url: /brain/skill-stacked-pr-workflow.html
     - title: "Skill — Comprehensive PR Review"
       url: /brain/skill-comprehensive-pr-review.html
+    - title: "comment-analyzer"
+      url: /brain/comment-analyzer.html
+    - title: "pr-test-analyzer"
+      url: /brain/pr-test-analyzer.html
+    - title: "silent-failure-hunter"
+      url: /brain/silent-failure-hunter.html
+    - title: "type-design-analyzer"
+      url: /brain/type-design-analyzer.html
+    - title: "code-reviewer"
+      url: /brain/code-reviewer.html
+    - title: "code-simplifier"
+      url: /brain/code-simplifier.html
     - title: "Skill Installation Guide"
       url: /brain/skill-installation-guide.html

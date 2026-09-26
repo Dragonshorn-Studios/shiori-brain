@@ -10,9 +10,9 @@ Shared baseline for coding agents working in Dragonshorn Studios repositories.
 
 ## Precedence
 1. The current user request.
-1. Repository-local `AGENTS.md`, `.ai/rules/`, README and CI configuration.
-1. This shared contract.
-1. General ecosystem conventions.
+2. Repository-local `AGENTS.md`, `.ai/rules/`, README and CI configuration.
+3. This shared contract.
+4. General ecosystem conventions.
 
 When rules disagree, follow the higher level and report the conflict. Never create a second tool-specific instruction file when the repository declares `AGENTS.md` canonical.
 

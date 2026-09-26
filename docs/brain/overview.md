@@ -25,15 +25,35 @@ AFFiNE is the source of truth. Shiori exports only this document and same-worksp
 - [Skill — Stacked PR Workflow](skill-stacked-pr-workflow.md))
 - [Skill — Comprehensive PR Review](skill-comprehensive-pr-review.md))
 
+## Specialized review agents
+- [comment-analyzer](comment-analyzer.md))
+- [pr-test-analyzer](pr-test-analyzer.md))
+- [silent-failure-hunter](silent-failure-hunter.md))
+- [type-design-analyzer](type-design-analyzer.md))
+- [code-reviewer](code-reviewer.md))
+- [code-simplifier](code-simplifier.md))
+
 ## Installation
 - [Skill Installation Guide](skill-installation-guide.md))
 
 ## Publishing contract
 
-Documents tagged `skill` are emitted as installable skills for Codex-compatible agents, Claude Code, Cursor, Windsurf, Vibe, Devin and ZCode. Keep private or unfinished notes outside this linked graph.
+Documents tagged skill are emitted as installable skills. Documents tagged agent are emitted as native subagents where supported and as portable Agent Skills for Codex-compatible agents, Claude Code, Cursor, Windsurf, Vibe, Devin and ZCode. Keep private or unfinished notes outside this linked graph.
 
 To publish another document:
 1. Place it in the Shared Architecture folder for human organization.
-1. Add a same-workspace link to it from this root or from another linked document.
-1. Add the `skill` tag only when it should become an installable agent skill.
-1. Optionally set the `shiori-icon` text property to an approved absolute PNG, JPEG or WebP URL.
+2. Add a same-workspace link to it from this root or from another linked document.
+3. Add the skill tag for an installable workflow or knowledge skill; add the agent tag for a specialized agent that should also receive portable skill adapters.
+4. Optionally set the `shiori-icon` text property to an approved absolute PNG, JPEG or WebP URL.
+
+<!-- unsupported: flavour=affine:embed&#45;linked&#45;doc blockId=OvGM0mHnls -->
+
+<!-- unsupported: flavour=affine:embed&#45;linked&#45;doc blockId=_5sjWtAs_l -->
+
+<!-- unsupported: flavour=affine:embed&#45;linked&#45;doc blockId=w7Mq8lKA8h -->
+
+<!-- unsupported: flavour=affine:embed&#45;linked&#45;doc blockId=XCBf0kF4vn -->
+
+<!-- unsupported: flavour=affine:embed&#45;linked&#45;doc blockId=fYj_PRSLMz -->
+
+<!-- unsupported: flavour=affine:embed&#45;linked&#45;doc blockId=FlKRqxEuvt -->

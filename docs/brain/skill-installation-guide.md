@@ -17,7 +17,7 @@ Review generated instructions before enabling them. Repository-local rules and t
 
 ## Clone the brain
 
-``` bash
+```bash
 git clone https://github.com/Dragonshorn-Studios/shiori-brain.git
 ```
 
@@ -48,7 +48,7 @@ For personal use, copy individual skill folders to `~/.agents/skills/`. Project-
 
 The repository root is a marketplace named `dragonshorn-brain`.
 
-``` text
+```text
 /plugin marketplace add Dragonshorn-Studios/shiori-brain
 /plugin install shiori@dragonshorn-brain
 ```
@@ -63,7 +63,7 @@ Install the single `shiori` entry from the generated Cursor marketplace in `.cur
 
 Install the complete generated collection from the repository root:
 
-``` bash
+```bash
 devin plugins install Dragonshorn-Studios/shiori-brain
 ```
 
@@ -77,9 +77,9 @@ Copy the generated `.windsurf/skills/` or `.vibe/skills/` directory into the app
 
 ## Updating
 1. Edit the canonical document in AFFiNE.
-1. Run **Sync AFFiNE knowledge** in `shiori-brain`.
-1. Review and merge the generated pull request.
-1. Pull the new `main` branch or refresh the marketplace/plugin installation.
-1. Re-copy project-scoped skills when the application does not consume the marketplace directly.
+2. Run **Sync AFFiNE knowledge** in `shiori-brain`.
+3. Review and merge the generated pull request.
+4. Pull the new `main` branch or refresh the marketplace/plugin installation.
+5. Re-copy project-scoped skills when the application does not consume the marketplace directly.
 
 The published human-readable archive is available at [dragonshorn-studios.github.io/shiori-brain](https://dragonshorn-studios.github.io/shiori-brain/).
