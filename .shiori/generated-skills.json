@@ -260,6 +260,7 @@
     "skills/typescript-services-automation/references/source.md"
   ],
   "iconProperty": "shiori-icon",
+  "pluginVersion": "1.1.0",
   "schemaVersion": 3,
   "tag": "skill"
 }
