@@ -25,6 +25,7 @@ Work through a list of issues as a stack of dependent PRs, one PR per&#10;issue,
 1. **Every STOP below is mandatory.** Ask the user and wait for an answer.
 1. If `gh` is missing, unauthenticated, or an issue can't be fetched —&#10;stop immediately and report; do not guess issue contents.
 1. Commits must pass the project's own checks (lint/typecheck/tests) run&#10;locally before opening each PR. Find them in [AGENTS.md/README/CI](http://AGENTS.md/README/CI) config;&#10;if you can't determine them, ask once at the start.
+1. When opening a PR stack, after each PR is created post this comment on it: "@maomao-review-bot issue X of Y in stack Z" where X is the PR's position bottom→top (1-based), Y the total count, and Z a slug for this stack. Once all N PRs are open and declared, post on the top (last) PR: "@maomao-review-bot top of stack : #pr1, #pr2, #pr3, …, #prN" listing every member bottom→top. Each PR's base branch must be the previous PR's head branch.
 
 ## Severity rubric (used by the review loop)
 - **CRITICAL** — breaks production, data loss, security hole, silent&#10;failure (swallowed error), broken build/tests.
