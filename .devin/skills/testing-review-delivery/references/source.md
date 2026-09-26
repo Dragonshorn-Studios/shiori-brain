@@ -16,11 +16,11 @@ A shared delivery loop for Dragonshorn Studios repositories.
 
 ## Verification order
 1. Focused test for the changed behavior.
-1. Formatter and linter for touched files.
-1. Type or static checks.
-1. Relevant package/module suite.
-1. Full repository suite and build when required by local instructions or CI.
-1. Browser, cross-platform or race checks when the product risk warrants them.
+2. Formatter and linter for touched files.
+3. Type or static checks.
+4. Relevant package/module suite.
+5. Full repository suite and build when required by local instructions or CI.
+6. Browser, cross-platform or race checks when the product risk warrants them.
 
 Do not claim a check passed unless it actually ran. Report skipped or unavailable checks.
 
@@ -28,12 +28,12 @@ Do not claim a check passed unless it actually ran. Report skipped or unavailabl
 
 Review the diff against:
 1. correctness and product contract;
-1. authorization, trust boundaries and secret handling;
-1. silent failures and recovery behavior;
-1. test quality and missing edge cases;
-1. type design and state invariants;
-1. comments and documentation accuracy;
-1. simplicity, naming and consistency with surrounding code.
+2. authorization, trust boundaries and secret handling;
+3. silent failures and recovery behavior;
+4. test quality and missing edge cases;
+5. type design and state invariants;
+6. comments and documentation accuracy;
+7. simplicity, naming and consistency with surrounding code.
 
 Critical, high and medium findings are resolved before delivery. Low-severity findings may be recorded separately when they are outside scope.
 

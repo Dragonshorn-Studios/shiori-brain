@@ -1,15 +1,47 @@
 {
   "documents": [
     {
+      "agent": false,
       "id": "beRj-vMOMy",
       "path": "agent-engineering-contract.md",
       "revision": "cf1f52a70165e74df49677c28e60d9bfc9db441e9ffb52a18f446be2cd471c5f",
-      "sha256": "067d1e390086fb6dfc2b8fa101e8024c3c1559d5a85c6ad1d077428b62ed3888",
+      "sha256": "06bd177f632bffdc75d322329dca6df155803c3c03f5c831965aaf99b169f07f",
       "skill": true,
       "title": "Agent Engineering Contract",
       "updatedAt": null
     },
     {
+      "agent": true,
+      "id": "fUd-TIUbub",
+      "path": "code-reviewer.md",
+      "revision": "6d1c5792c08b882ba6589aa6e91a2a8c1f4c99557ec9963357d77829cd9deedd",
+      "sha256": "64dfefdbca5a252b0f19973a2899b685e6835ef49547fb530a335434c69440cf",
+      "skill": true,
+      "title": "code-reviewer",
+      "updatedAt": null
+    },
+    {
+      "agent": true,
+      "id": "zqpMdeH5OL",
+      "path": "code-simplifier.md",
+      "revision": "706602cd97558c773d4f8ab556f6244e894f67b781a2d64f20fd2619b25609c4",
+      "sha256": "0784b1c49c6aa51eeeeb2c91215375df1a8f1a35e2e269158abf6ea527ffc864",
+      "skill": true,
+      "title": "code-simplifier",
+      "updatedAt": null
+    },
+    {
+      "agent": true,
+      "id": "xCzfG2K9la",
+      "path": "comment-analyzer.md",
+      "revision": "fdf13bc641862640f07c25cfc8d9b0843df3d606843a2fe823b3a70690c7d9f7",
+      "sha256": "2c0a7e6c2ad49aa6c48f0a4a3c075822f430e0e7ff73254b3e97140111a80ff1",
+      "skill": true,
+      "title": "comment-analyzer",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
       "id": "5m9JCEM8kW",
       "path": "go-services-clis.md",
       "revision": "6dde83de1620b5e890154f5b1bc36a74daddf8f714c58ce2d5cecdf6a8c57e59",
@@ -19,6 +51,7 @@
       "updatedAt": null
     },
     {
+      "agent": false,
       "id": "D0XZ3Q7LJQ",
       "path": "laravel-php-applications.md",
       "revision": "8c89b498c83225fcc1d299e58495b0f1f0b03f79dc7622e792e945f56a78bf9d",
@@ -28,15 +61,27 @@
       "updatedAt": null
     },
     {
+      "agent": false,
       "id": "j4IXQ9l6wz",
       "path": "overview.md",
-      "revision": "90bfa88c3af7604413b2472d556b010cede935db64258533bf2c6c7d4cc07e6a",
-      "sha256": "4fd3363c91cda0b1db5412cdcdce5b140ffa17eeb782a047b5542b38b4e96c20",
+      "revision": "6d9170e69a4574b3079a20f04fb6e643062b084184002a4c1a1255e313be2e63",
+      "sha256": "4b38c18e100b552c61b177849853f8503cfc03f6b8cd7c8c836444d9319badef",
       "skill": false,
       "title": "Shared Architecture — Start Here",
       "updatedAt": null
     },
     {
+      "agent": true,
+      "id": "5y2cid6W7c",
+      "path": "pr-test-analyzer.md",
+      "revision": "f71bf6e9eae20bcae87f39d885c9e9b535cf8f7d1c66bc6d4bb8448017b2a41a",
+      "sha256": "63783547bcedae28bc4f7cef41a50a369a6b00061e15066aa29309497b55e881",
+      "skill": true,
+      "title": "pr-test-analyzer",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
       "id": "u9ydl457Du",
       "path": "python-services-mcp-apps.md",
       "revision": "9d7bd3a7b09edc3e0fba6b5218c4e39e9274d7de70e50de950139c0d812be5dc",
@@ -46,6 +91,7 @@
       "updatedAt": null
     },
     {
+      "agent": false,
       "id": "qwe7oRtmJp",
       "path": "security-trust-boundaries-human-approval.md",
       "revision": "057b5629c0a47ece08047fd4ba7a422c35a8f52eb1695ded6b1c80d253cbcb8e",
@@ -55,42 +101,67 @@
       "updatedAt": null
     },
     {
+      "agent": true,
+      "id": "s-yBwYR5WE",
+      "path": "silent-failure-hunter.md",
+      "revision": "e9f9d5ce5bc43e8e66edd548ac4774b4f4077cb5b4065e901c2f24d3b5b0b19f",
+      "sha256": "9a2cc31d66c5c9c2dc5f58b391a453f8ad08475877032d4f9cf52e8114aaaadd",
+      "skill": true,
+      "title": "silent-failure-hunter",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
       "id": "z7IgB0vfO1",
       "path": "skill-comprehensive-pr-review.md",
-      "revision": "3591bcc28691b6907c3cdbeb32a774a7983d2fb311af953670c81f137a6c5cc4",
-      "sha256": "16b5931583cea7e871963e62961781a85e46f4f5b37745807d068698d5403e24",
+      "revision": "818ab69daa96ca96cc1ec6f83e7b56374678eafbcaf636100a30032aa17ec919",
+      "sha256": "2ded1e533b0fb9bcb14504e970efa9989906afddc796b2b79e108e7b9709cd52",
       "skill": true,
       "title": "Skill — Comprehensive PR Review",
       "updatedAt": null
     },
     {
+      "agent": false,
       "id": "pULFwF62YI",
       "path": "skill-installation-guide.md",
       "revision": "661ed8b6827266169e9b2ce3bb7d2ca065f551a3c95ab7aea7dd3eec67d46a5b",
-      "sha256": "ee86221bc3f4cc8e45ae5f1940be555850644e5d169f4e403f32153802c0120c",
+      "sha256": "dae0d246b5700141d33141035fdf00ea6e36388f6442db8a2e388955ee432732",
       "skill": false,
       "title": "Skill Installation Guide",
       "updatedAt": null
     },
     {
+      "agent": false,
       "id": "zUln8DRF4P",
       "path": "skill-stacked-pr-workflow.md",
-      "revision": "c1dc26e1eb7cd92a3df24896db26b5f8d5fecc6d6db35c7c1d3e96f22f0f1fee",
-      "sha256": "97f90c3385b086fbe25bc84f6eb6bed3f09657f4826134414cb92dec08d3a53c",
+      "revision": "7fb17ff68db01ba50fae16dfecc3d720860387451a79ab57f589e5da01ca80a2",
+      "sha256": "82e5e168e789bedbd78a3236348b3b90cf2826702f97cbcccdedde792fc73b7f",
       "skill": true,
       "title": "Skill — Stacked PR Workflow",
       "updatedAt": null
     },
     {
+      "agent": false,
       "id": "0-2oPGQCfe",
       "path": "testing-review-delivery.md",
       "revision": "bf113d1043e061db6d06694d3e0109ea0c461a368cf9b43cef01f11f7eb05cc8",
-      "sha256": "d61bf4b6e86bc16330cd4e699741ab1719be1aba24a5028781a642de8464656f",
+      "sha256": "e62aaa6cf3ff7ee0dd38dbf4715404a8a07d4c2f49b5918148c7e8ddd17abf7d",
       "skill": true,
       "title": "Testing, Review & Delivery",
       "updatedAt": null
     },
     {
+      "agent": true,
+      "id": "AraMS7nUQo",
+      "path": "type-design-analyzer.md",
+      "revision": "6ec15a285ca26ca305ea4cf9b1d93fe1958868a7ee32b185ce22ba50b3a121f0",
+      "sha256": "14db5097458efe1f64f24fc3071757c0162e06423c877d18b30e14b8ee6015e3",
+      "skill": true,
+      "title": "type-design-analyzer",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
       "id": "GjUoG9ePZ5",
       "path": "typescript-services-automation.md",
       "revision": "25e9bd2adb494324ddb5e2aa404acc17cf73f989b5ef84c302b33789a60c1758",
@@ -103,6 +174,7 @@
   "generator": "shiori",
   "schemaVersion": 1,
   "source": {
+    "agentTag": "agent",
     "baseUrl": "https://affine.dragonshorn.cloud",
     "rootDocumentId": "j4IXQ9l6wz",
     "skillIconProperty": "shiori-icon",
