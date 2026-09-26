@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Dragonshorn-Studios/shiori-github-action@v1.1.3
+      - uses: Dragonshorn-Studios/shiori-github-action@v1.2.0
         with:
           affine-base-url: ${{ vars.AFFINE_BASE_URL }}
           affine-email: ${{ secrets.AFFINE_EMAIL }}
