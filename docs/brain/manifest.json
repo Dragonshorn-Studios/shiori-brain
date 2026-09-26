@@ -66,8 +66,8 @@
     {
       "id": "pULFwF62YI",
       "path": "skill-installation-guide.md",
-      "revision": "5785aade430a11414512253def44d86a2acd932d1a9598766dab50f7fb749325",
-      "sha256": "158331166bdd63fbf303bc4be11fd0e3d1f604338fbb69a52f83663f6454ee38",
+      "revision": "661ed8b6827266169e9b2ce3bb7d2ca065f551a3c95ab7aea7dd3eec67d46a5b",
+      "sha256": "ee86221bc3f4cc8e45ae5f1940be555850644e5d169f4e403f32153802c0120c",
       "skill": false,
       "title": "Skill Installation Guide",
       "updatedAt": null
