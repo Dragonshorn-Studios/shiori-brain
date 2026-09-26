@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Dragonshorn-Studios/shiori-github-action@v1.2.0
+      - uses: Dragonshorn-Studios/shiori-github-action@v1.3.0
         with:
           affine-base-url: ${{ vars.AFFINE_BASE_URL }}
           affine-email: ${{ secrets.AFFINE_EMAIL }}
@@ -23,6 +23,7 @@ jobs:
           workspace-id: ${{ vars.AFFINE_WORKSPACE_ID }}
           root-document-id: ${{ vars.AFFINE_ROOT_DOCUMENT_ID }}
           skill-tag: skill
+          agent-tag: agent
           skill-icon-property: shiori-icon
           marketplace-name: dragonshorn-brain
           repository: Dragonshorn-Studios/shiori-brain
