@@ -50,14 +50,14 @@ The repository root is a marketplace named `dragonshorn-brain`.
 
 ``` text
 /plugin marketplace add Dragonshorn-Studios/shiori-brain
-/plugin install shiori-agent-engineering-contract@dragonshorn-brain
+/plugin install shiori@dragonshorn-brain
 ```
 
-Replace `shiori-agent-engineering-contract` with another plugin name from the marketplace. Repeat the install command for every package you want enabled.
+The marketplace exposes one plugin named `shiori`; it contains every document tagged `skill` in AFFiNE.
 
 ## Cursor
 
-Use the generated Cursor marketplace in `.cursor-plugin/marketplace.json`, or copy `.cursor/skills/` into the target project. The copy-based project installation is the portable fallback when marketplace import is unavailable.
+Install the single `shiori` entry from the generated Cursor marketplace in `.cursor-plugin/marketplace.json`, or copy `.cursor/skills/` into the target project. The copy-based project installation is the portable fallback when marketplace import is unavailable.
 
 ## Devin
 
