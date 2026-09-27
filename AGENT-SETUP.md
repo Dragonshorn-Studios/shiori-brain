@@ -24,30 +24,44 @@ The doctor is read-only. It does not edit home-directory configuration or instal
 
 ## Install from the command line
 
-Only explicitly selected hosts are changed. Codex and Claude Code can expose complete non-interactive plugin installation commands, depending on the installed client version and account rollout. The doctor checks those exact subcommands before changing anything:
+Only explicitly selected hosts are changed. OpenCode, MCode, and Vibe share one managed checkout at `~/.local/share/shiori/shiori-brain`; its skills are linked individually into the standard global `~/.agents/skills` directory. Codex and Claude Code use their plugin CLIs when the installed client version and account rollout expose them:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install codex claude
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install opencode mcode vibe codex claude
 ```
 
 ```powershell
-$env:SHIORI_INSTALL='codex,claude'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+$env:SHIORI_INSTALL='opencode,mcode,vibe,codex,claude'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
-For a checked-out script, use `sh scripts/shiori-doctor.sh --install codex claude` or `.\scripts\shiori-doctor.ps1 -Install codex,claude`. Re-running an installer is safe: an existing marketplace or plugin is reported and skipped. If a CLI build or account does not expose plugin management, the selected installer stops with an explanation and makes no Shiori changes.
+For a checked-out script, use `sh scripts/shiori-doctor.sh --install opencode mcode vibe` or `.\scripts\shiori-doctor.ps1 -Install opencode,mcode,vibe`. Re-running install fast-forwards the managed checkout and reconciles skill links. Existing non-Shiori skill destinations are never overwritten.
+
+## Update installed hosts
+
+The installer records successful host selections. Update all recorded hosts without remembering the list:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --update
+```
+
+```powershell
+$env:SHIORI_UPDATE='all'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+```
+
+Pass names after `--update`, or use PowerShell `-Update -UpdateTargets opencode,mcode`, to update only selected hosts. Checkout updates are always `git pull --ff-only`; an unexpected origin, dirty checkout, non-repository path, or conflicting skill destination stops the operation rather than deleting user data.
 
 ## Native setup matrix
 
 | Host | Project use | Native reusable installation |
 | --- | --- | --- |
-| OpenCode | Automatic through `.agents/skills` | Add this checkout's `skills` directory to `skills` in `opencode.json`, or copy/link each skill to `~/.config/opencode/skills`. |
+| OpenCode | Automatic through `.agents/skills` | `--install opencode` uses the managed checkout and global Agent Skills links. |
 | Codex / ChatGPT desktop | Repository skills work through `.agents/skills` | Run `codex plugin marketplace add Dragonshorn-Studios/shiori-brain`, then open `/plugins` and install **Shiori**. |
 | Claude Code | Automatic through `.claude/skills` and `.claude/agents` | Run `/plugin marketplace add Dragonshorn-Studios/shiori-brain`, then `/plugin install shiori@dragonshorn-brain`. |
 | ZCode | Install the generated plugin | Open **Settings -> Plugins -> Create -> Add marketplace**, enter `Dragonshorn-Studios/shiori-brain`, then install **Shiori**. |
 | Cursor | Automatic through `.cursor/skills` | Open **Settings -> Plugins**, add `https://github.com/Dragonshorn-Studios/shiori-brain`, then install **Shiori**. |
-| MCode / MiniMax Code | Automatic through `.agents/skills` in this checkout | For a reusable local plugin, find the local marketplace with `mcode plugin marketplace list --json`, copy `plugins/shiori` there, then run `mcode plugin enable shiori@local`. |
+| MCode / MiniMax Code | Automatic through `.agents/skills` in this checkout | `--install mcode` uses the same managed checkout and global Agent Skills links. |
 | Windsurf | Automatic through `.windsurf/skills` | Keep the generated project adapter; no marketplace step is required. |
-| Vibe | Automatic through `.vibe/skills` | Keep the generated project adapter; no marketplace step is required. |
+| Vibe | Automatic through `.vibe/skills` | `--install vibe` uses the same managed checkout and global Agent Skills links. |
 | Devin | Automatic through committed `.devin/skills` in repository sessions | Devin may be cloud-only, so absence of a local executable is not an error. Connect this repository to the Devin workspace. |
 
 ## What gets generated

@@ -27,20 +27,30 @@ curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/ma
 The same scripts can be run directly from `scripts/` in a checkout; they then
 also verify that the generated project adapters are present.
 
-To install only the selected hosts when their client version and account expose
-non-interactive plugin management:
+Install selected hosts. OpenCode, MCode, and Vibe share one managed checkout;
+Codex and Claude use plugin management when their client/account exposes it:
 
 ```powershell
-$env:SHIORI_INSTALL='codex,claude'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+$env:SHIORI_INSTALL='opencode,mcode,vibe,codex,claude'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install codex claude
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install opencode mcode vibe codex claude
 ```
 
 The installer preflights every selection before changing anything. Unsupported
 or gated clients stop with an explanation; the default invocation remains
 read-only.
+
+Later, update every previously selected host without remembering the list:
+
+```powershell
+$env:SHIORI_UPDATE='all'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --update
+```
 
 See [AGENT-SETUP.md](AGENT-SETUP.md) for the complete OpenCode, Codex, Claude
 Code, ZCode, Cursor, MCode/MiniMax, Windsurf, Vibe, and Devin matrix.
