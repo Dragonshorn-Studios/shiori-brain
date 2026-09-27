@@ -40,6 +40,12 @@ function Add-RecordedHost {
     if ($Recorded -notcontains $Target) { Add-Content -LiteralPath $InstalledHostsFile -Value $Target -Encoding utf8 }
 }
 
+function Test-RecordedHost {
+    param([string]$Target)
+    if (-not (Test-Path -LiteralPath $InstalledHostsFile)) { return $false }
+    return @(Get-Content -LiteralPath $InstalledHostsFile) -contains $Target
+}
+
 function Update-ManagedCheckout {
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'Cannot install shared skills: git is not available.' }
     $GitDirectory = Join-Path $ManagedCheckout '.git'
@@ -89,24 +95,12 @@ function Get-ShioriInstallStatus {
             return 'not installed'
         }
         'codex' {
-            if (-not (Get-Command codex -ErrorAction SilentlyContinue)) { return 'unknown (plugin status unavailable)' }
-            try {
-                $RawPlugins = & codex plugin list --json 2>$null | Out-String
-                if ($LASTEXITCODE -ne 0) { return 'unknown (plugin status unavailable)' }
-                $Plugins = $RawPlugins | ConvertFrom-Json
-                if ($Plugins.installed.id -contains "shiori@$Marketplace") { return 'installed (native plugin)' }
-                return 'not installed'
-            } catch { return 'unknown (plugin status unavailable)' }
+            if (Test-RecordedHost codex) { return 'installed (recorded native plugin)' }
+            return 'unknown (not installed by this doctor)'
         }
         'claude' {
-            if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { return 'unknown (plugin status unavailable)' }
-            try {
-                $RawPlugins = & claude plugin list --json 2>$null | Out-String
-                if ($LASTEXITCODE -ne 0) { return 'unknown (plugin status unavailable)' }
-                $Plugins = $RawPlugins | ConvertFrom-Json
-                if ($Plugins.id -contains "shiori@$Marketplace") { return 'installed (native plugin)' }
-                return 'not installed'
-            } catch { return 'unknown (plugin status unavailable)' }
+            if (Test-RecordedHost claude) { return 'installed (recorded native plugin)' }
+            return 'unknown (not installed by this doctor)'
         }
         default { return 'unknown (no local status API)' }
     }
