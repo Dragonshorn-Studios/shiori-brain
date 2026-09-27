@@ -27,6 +27,21 @@ curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/ma
 The same scripts can be run directly from `scripts/` in a checkout; they then
 also verify that the generated project adapters are present.
 
+To install only the selected hosts when their client version and account expose
+non-interactive plugin management:
+
+```powershell
+$env:SHIORI_INSTALL='codex,claude'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install codex claude
+```
+
+The installer preflights every selection before changing anything. Unsupported
+or gated clients stop with an explanation; the default invocation remains
+read-only.
+
 See [AGENT-SETUP.md](AGENT-SETUP.md) for the complete OpenCode, Codex, Claude
 Code, ZCode, Cursor, MCode/MiniMax, Windsurf, Vibe, and Devin matrix.
 
