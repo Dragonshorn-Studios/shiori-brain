@@ -32,6 +32,11 @@ record_host() {
   fi
   printf '%s\n' "$1" >> "$installed_hosts_file"
 }
+host_is_recorded() {
+  [ -f "$installed_hosts_file" ] || return 1
+  while IFS= read -r recorded_host; do [ "$recorded_host" = "$1" ] && return 0; done < "$installed_hosts_file"
+  return 1
+}
 ensure_checkout() {
   has_command git || { printf '%s\n' 'Cannot install shared skills: git is not available.' >&2; return 1; }
   if [ -d "$checkout/.git" ]; then
@@ -206,18 +211,10 @@ shiori_status() {
       if shared_skills_installed; then printf '%s' 'installed (managed Agent Skills)'; else printf '%s' 'not installed'; fi
       ;;
     codex)
-      if has_command codex && codex_plugins=$(codex plugin list --json 2>/dev/null); then
-        if contains_text "$codex_plugins" "shiori@$marketplace"; then printf '%s' 'installed (native plugin)'; else printf '%s' 'not installed'; fi
-      else
-        printf '%s' 'unknown (plugin status unavailable)'
-      fi
+      if host_is_recorded codex; then printf '%s' 'installed (recorded native plugin)'; else printf '%s' 'unknown (not installed by this doctor)'; fi
       ;;
     claude)
-      if has_command claude && claude_plugins=$(claude plugin list --json 2>/dev/null); then
-        if contains_text "$claude_plugins" "shiori@$marketplace"; then printf '%s' 'installed (native plugin)'; else printf '%s' 'not installed'; fi
-      else
-        printf '%s' 'unknown (plugin status unavailable)'
-      fi
+      if host_is_recorded claude; then printf '%s' 'installed (recorded native plugin)'; else printf '%s' 'unknown (not installed by this doctor)'; fi
       ;;
     *) printf '%s' 'unknown (no local status API)' ;;
   esac
