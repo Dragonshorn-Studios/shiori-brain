@@ -2,6 +2,14 @@
 set -eu
 
 repository="${SHIORI_REPOSITORY:-Dragonshorn-Studios/shiori-brain}"
+guide_url="https://github.com/$repository/blob/main/AGENT-SETUP.md"
+if [ -d '.agents/skills' ] && [ -d 'plugins/shiori' ]; then
+  context='checkout'
+  project_hint='project adapters are ready in this checkout'
+else
+  context='remote'
+  project_hint='no Shiori checkout detected; use a marketplace installation below'
+fi
 
 has_command() { command -v "$1" >/dev/null 2>&1; }
 has_home() { [ -e "$HOME/$1" ]; }
@@ -21,7 +29,7 @@ row() {
   fi
 }
 
-printf 'Shiori agent doctor\nRepository: %s\n\n' "$repository"
+printf 'Shiori agent doctor\nRepository: %s\nMode: %s (%s)\n\n' "$repository" "$context" "$project_hint"
 row 'OpenCode' opencode '.config/opencode' local
 row 'Codex' codex '.codex' local
 row 'Claude Code' claude '.claude' local
@@ -35,12 +43,12 @@ row 'Devin' devin '.devin' cloud
 printf '%s\n' \
   '' \
   'Recommended native setup' \
-  "  OpenCode: project skills are ready in .agents/skills. For global use, add this checkout's skills directory to opencode.json or link it under ~/.config/opencode/skills." \
+  "  OpenCode: in a checkout it reads .agents/skills automatically. For global use, point opencode.json at a Shiori skills checkout or link it under ~/.config/opencode/skills." \
   "  Codex:    codex plugin marketplace add $repository ; then open /plugins and install Shiori." \
   "  Claude:   /plugin marketplace add $repository ; then /plugin install shiori@dragonshorn-brain." \
   "  ZCode:    Settings -> Plugins -> Create -> Add marketplace -> $repository; install Shiori." \
   "  Cursor:   Settings -> Plugins; add https://github.com/$repository; install Shiori." \
-  '  MCode:    project skills are ready in .agents/skills. For plugin install, inspect mcode plugin marketplace list --json and copy plugins/shiori into its local marketplace.' \
+  '  MCode:    in a checkout it reads .agents/skills automatically. For plugin install, inspect mcode plugin marketplace list --json and place plugins/shiori in its local marketplace.' \
   '  Devin:    connect this repository to the cloud workspace; no local executable is required.' \
   '' \
-  'Full instructions: AGENT-SETUP.md'
+  "Full instructions: $guide_url"

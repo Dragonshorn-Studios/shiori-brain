@@ -12,17 +12,20 @@ run the sync workflow instead.
 
 ## Install for an agent
 
-Run the read-only setup doctor; it detects local agent CLIs and configuration,
-handles cloud-only agents such as Devin, and prints the native installation
-step for each host:
+Run the read-only setup doctor without cloning the repository. It detects local
+agent CLIs and configuration, handles cloud-only agents such as Devin, and
+prints the native installation step for each host:
 
 ```powershell
-.\scripts\shiori-doctor.ps1
+irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
 ```bash
-sh scripts/shiori-doctor.sh
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh
 ```
+
+The same scripts can be run directly from `scripts/` in a checkout; they then
+also verify that the generated project adapters are present.
 
 See [AGENT-SETUP.md](AGENT-SETUP.md) for the complete OpenCode, Codex, Claude
 Code, ZCode, Cursor, MCode/MiniMax, Windsurf, Vibe, and Devin matrix.

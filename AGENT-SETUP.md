@@ -1,6 +1,16 @@
 # Install Shiori for coding agents
 
-This repository is already project-ready: supported agents can read the committed adapters without a global installation. Run the doctor from the repository root to see which local tools are present and the native setup action for each one.
+Run the read-only doctor without cloning the repository:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh
+```
+
+```powershell
+irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+```
+
+If this repository is already checked out, the doctor also recognizes the project adapters:
 
 ```bash
 sh scripts/shiori-doctor.sh
@@ -10,7 +20,7 @@ sh scripts/shiori-doctor.sh
 .\scripts\shiori-doctor.ps1
 ```
 
-The doctor is read-only. It does not edit home-directory configuration or install plugins.
+The doctor is read-only. It does not edit home-directory configuration or install plugins. When piped from GitHub it runs in remote mode and does not assume that this repository's project skill directories exist locally.
 
 ## Native setup matrix
 
