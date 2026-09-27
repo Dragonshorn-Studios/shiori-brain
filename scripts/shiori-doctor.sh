@@ -175,27 +175,64 @@ row() {
   command_name=$2
   home_path=$3
   mode=$4
+  provider=$5
   if has_command "$command_name"; then
-    printf '%-18s detected (CLI: %s)\n' "$tool" "$(command -v "$command_name")"
+    printf '%-18s detected (CLI: %s) | Shiori: %s\n' "$tool" "$(command -v "$command_name")" "$(shiori_status "$provider")"
   elif [ -n "$home_path" ] && has_home "$home_path"; then
-    printf '%-18s detected (configuration: ~/%s)\n' "$tool" "$home_path"
+    printf '%-18s detected (configuration: ~/%s) | Shiori: %s\n' "$tool" "$home_path" "$(shiori_status "$provider")"
   elif [ "$mode" = cloud ]; then
-    printf '%-18s cloud-capable (local CLI not required)\n' "$tool"
+    printf '%-18s cloud-capable (local CLI not required) | Shiori: %s\n' "$tool" "$(shiori_status "$provider")"
   else
     printf '%-18s not detected locally\n' "$tool"
   fi
 }
 
+shared_skills_installed() {
+  [ -d "$checkout/.git" ] && [ -s "$managed_skills_file" ] || return 1
+  found_skill=false
+  while IFS= read -r skill_name; do
+    [ -n "$skill_name" ] || continue
+    found_skill=true
+    target_skill="$skills_root/$skill_name"
+    source_skill="$checkout/skills/$skill_name"
+    [ -L "$target_skill" ] && [ "$(readlink "$target_skill")" = "$source_skill" ] || return 1
+  done < "$managed_skills_file"
+  [ "$found_skill" = true ]
+}
+
+shiori_status() {
+  case $1 in
+    opencode|mcode|vibe)
+      if shared_skills_installed; then printf '%s' 'installed (managed Agent Skills)'; else printf '%s' 'not installed'; fi
+      ;;
+    codex)
+      if has_command codex && codex_plugins=$(codex plugin list --json 2>/dev/null); then
+        if contains_text "$codex_plugins" "shiori@$marketplace"; then printf '%s' 'installed (native plugin)'; else printf '%s' 'not installed'; fi
+      else
+        printf '%s' 'unknown (plugin status unavailable)'
+      fi
+      ;;
+    claude)
+      if has_command claude && claude_plugins=$(claude plugin list --json 2>/dev/null); then
+        if contains_text "$claude_plugins" "shiori@$marketplace"; then printf '%s' 'installed (native plugin)'; else printf '%s' 'not installed'; fi
+      else
+        printf '%s' 'unknown (plugin status unavailable)'
+      fi
+      ;;
+    *) printf '%s' 'unknown (no local status API)' ;;
+  esac
+}
+
 printf 'Shiori agent doctor\nRepository: %s\nMode: %s (%s)\n\n' "$repository" "$context" "$project_hint"
-row 'OpenCode' opencode '.config/opencode' local
-row 'Codex' codex '.codex' local
-row 'Claude Code' claude '.claude' local
-row 'ZCode' zcode '.zcode' local
-row 'Cursor' cursor '.cursor' local
-row 'MCode / MiniMax' mcode '.minimax' local
-row 'Windsurf' windsurf '.windsurf' local
-row 'Vibe' vibe '.vibe' local
-row 'Devin' devin '.devin' cloud
+row 'OpenCode' opencode '.config/opencode' local opencode
+row 'Codex' codex '.codex' local codex
+row 'Claude Code' claude '.claude' local claude
+row 'ZCode' zcode '.zcode' local zcode
+row 'Cursor' cursor '.cursor' local cursor
+row 'MCode / MiniMax' mcode '.minimax' local mcode
+row 'Windsurf' windsurf '.windsurf' local windsurf
+row 'Vibe' vibe '.vibe' local vibe
+row 'Devin' devin '.devin' cloud devin
 
 printf '%s\n' \
   '' \
