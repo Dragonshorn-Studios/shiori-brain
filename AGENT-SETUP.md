@@ -22,6 +22,20 @@ sh scripts/shiori-doctor.sh
 
 The doctor is read-only. It does not edit home-directory configuration or install plugins. When piped from GitHub it runs in remote mode and does not assume that this repository's project skill directories exist locally.
 
+## Install from the command line
+
+Only explicitly selected hosts are changed. Codex and Claude Code can expose complete non-interactive plugin installation commands, depending on the installed client version and account rollout. The doctor checks those exact subcommands before changing anything:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install codex claude
+```
+
+```powershell
+$env:SHIORI_INSTALL='codex,claude'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+```
+
+For a checked-out script, use `sh scripts/shiori-doctor.sh --install codex claude` or `.\scripts\shiori-doctor.ps1 -Install codex,claude`. Re-running an installer is safe: an existing marketplace or plugin is reported and skipped. If a CLI build or account does not expose plugin management, the selected installer stops with an explanation and makes no Shiori changes.
+
 ## Native setup matrix
 
 | Host | Project use | Native reusable installation |
