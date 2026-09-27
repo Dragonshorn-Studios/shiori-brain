@@ -10,6 +10,23 @@ supported coding agents.
 Do not edit generated files by hand. Change the source documents in AFFiNE and
 run the sync workflow instead.
 
+## Install for an agent
+
+Run the read-only setup doctor; it detects local agent CLIs and configuration,
+handles cloud-only agents such as Devin, and prints the native installation
+step for each host:
+
+```powershell
+.\scripts\shiori-doctor.ps1
+```
+
+```bash
+sh scripts/shiori-doctor.sh
+```
+
+See [AGENT-SETUP.md](AGENT-SETUP.md) for the complete OpenCode, Codex, Claude
+Code, ZCode, Cursor, MCode/MiniMax, Windsurf, Vibe, and Devin matrix.
+
 ## Repository settings
 
 Configure these GitHub Actions values:
