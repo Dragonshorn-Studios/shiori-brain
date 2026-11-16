@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "type-design-analyzer"
+title: "Type Design Analyzer"
 shiori_source_id: "AraMS7nUQo"
 ---
 

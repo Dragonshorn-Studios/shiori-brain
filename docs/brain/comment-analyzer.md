@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "comment-analyzer"
+title: "Comment Analyzer"
 shiori_source_id: "xCzfG2K9la"
 ---
 

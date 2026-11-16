@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "code-reviewer"
+title: "Code Reviewer"
 shiori_source_id: "fUd-TIUbub"
 ---
 

@@ -1,65 +1,21 @@
 - title: "Shared Architecture — Start Here"
   url: /brain/overview.html
   children:
-    - title: "Agent Engineering Contract"
-      url: /brain/agent-engineering-contract.html
-    - title: "Security, Trust Boundaries & Human Approval"
-      url: /brain/security-trust-boundaries-human-approval.html
-    - title: "Testing, Review & Delivery"
-      url: /brain/testing-review-delivery.html
-    - title: "Laravel & PHP Applications"
-      url: /brain/laravel-php-applications.html
-    - title: "Go Services & CLIs"
-      url: /brain/go-services-clis.html
-    - title: "TypeScript Services & Automation"
-      url: /brain/typescript-services-automation.html
-    - title: "Python Services & MCP Apps"
-      url: /brain/python-services-mcp-apps.html
-    - title: "Skill — Stacked PR Workflow"
-      url: /brain/skill-stacked-pr-workflow.html
-    - title: "Skill — Comprehensive PR Review"
-      url: /brain/skill-comprehensive-pr-review.html
-    - title: "Skill — Read a FigCraft Design (View-Only)"
-      url: /brain/skill-read-a-figcraft-design-view-only.html
-    - title: "Skill — Build UI from a Design"
-      url: /brain/skill-build-ui-from-a-design.html
-    - title: "Skill — Design Tokens: Tailwind"
-      url: /brain/skill-design-tokens-tailwind.html
-    - title: "Skill — Design Tokens: Plain CSS"
-      url: /brain/skill-design-tokens-plain-css.html
-    - title: "Skill — UI in React + TypeScript"
-      url: /brain/skill-ui-in-react-typescript.html
-    - title: "Skill — UI in Flutter"
-      url: /brain/skill-ui-in-flutter.html
-    - title: "Skill — Web UI Checks (Playwright + axe)"
-      url: /brain/skill-web-ui-checks-playwright-axe.html
-    - title: "comment-analyzer"
-      url: /brain/comment-analyzer.html
-    - title: "pr-test-analyzer"
-      url: /brain/pr-test-analyzer.html
-    - title: "silent-failure-hunter"
-      url: /brain/silent-failure-hunter.html
-    - title: "type-design-analyzer"
-      url: /brain/type-design-analyzer.html
-    - title: "code-reviewer"
-      url: /brain/code-reviewer.html
-    - title: "code-simplifier"
-      url: /brain/code-simplifier.html
     - title: "Skill Installation Guide"
       url: /brain/skill-installation-guide.html
 - title: "Agents"
   children:
-    - title: "code-reviewer"
+    - title: "Code Reviewer"
       url: /brain/code-reviewer.html
-    - title: "code-simplifier"
+    - title: "Code Simplifier"
       url: /brain/code-simplifier.html
-    - title: "comment-analyzer"
+    - title: "Comment Analyzer"
       url: /brain/comment-analyzer.html
-    - title: "pr-test-analyzer"
+    - title: "PR Test Analyzer"
       url: /brain/pr-test-analyzer.html
-    - title: "silent-failure-hunter"
+    - title: "Silent Failure Hunter"
       url: /brain/silent-failure-hunter.html
-    - title: "type-design-analyzer"
+    - title: "Type Design Analyzer"
       url: /brain/type-design-analyzer.html
 - title: "Skills"
   children:

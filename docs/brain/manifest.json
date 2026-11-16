@@ -15,7 +15,7 @@
       "id": "fUd-TIUbub",
       "path": "code-reviewer.md",
       "revision": "6d1c5792c08b882ba6589aa6e91a2a8c1f4c99557ec9963357d77829cd9deedd",
-      "sha256": "64dfefdbca5a252b0f19973a2899b685e6835ef49547fb530a335434c69440cf",
+      "sha256": "451043929f605ef11532e2958dc90a9e464250c41e6d1d810dbc66067e083aba",
       "skill": true,
       "title": "code-reviewer",
       "updatedAt": null
@@ -25,7 +25,7 @@
       "id": "zqpMdeH5OL",
       "path": "code-simplifier.md",
       "revision": "d15be322a79b9ab6739a4d835f9c24f50c128ddfc9fa719603e8c8209ba8240b",
-      "sha256": "0784b1c49c6aa51eeeeb2c91215375df1a8f1a35e2e269158abf6ea527ffc864",
+      "sha256": "6194708fb7f73bfc8fbc3d3ba87f4a0bbc68f2b9b57745f264ce4faab6871ba1",
       "skill": true,
       "title": "code-simplifier",
       "updatedAt": null
@@ -35,7 +35,7 @@
       "id": "xCzfG2K9la",
       "path": "comment-analyzer.md",
       "revision": "fdf13bc641862640f07c25cfc8d9b0843df3d606843a2fe823b3a70690c7d9f7",
-      "sha256": "2c0a7e6c2ad49aa6c48f0a4a3c075822f430e0e7ff73254b3e97140111a80ff1",
+      "sha256": "076ec2abedda527a6557319c4bbf67b5e4c9154d32190e2e7d844f8d88e5a6a1",
       "skill": true,
       "title": "comment-analyzer",
       "updatedAt": null
@@ -75,7 +75,7 @@
       "id": "5y2cid6W7c",
       "path": "pr-test-analyzer.md",
       "revision": "f71bf6e9eae20bcae87f39d885c9e9b535cf8f7d1c66bc6d4bb8448017b2a41a",
-      "sha256": "63783547bcedae28bc4f7cef41a50a369a6b00061e15066aa29309497b55e881",
+      "sha256": "0119ef7f35abb5f7942a4e5a586b5fdcda9d308d445bd11ab432f6e914aff3f2",
       "skill": true,
       "title": "pr-test-analyzer",
       "updatedAt": null
@@ -105,7 +105,7 @@
       "id": "s-yBwYR5WE",
       "path": "silent-failure-hunter.md",
       "revision": "e9f9d5ce5bc43e8e66edd548ac4774b4f4077cb5b4065e901c2f24d3b5b0b19f",
-      "sha256": "9a2cc31d66c5c9c2dc5f58b391a453f8ad08475877032d4f9cf52e8114aaaadd",
+      "sha256": "88d8d6035089a336d6972851c3f223d7861e4e37d8350e4a0da4716a7bd89deb",
       "skill": true,
       "title": "silent-failure-hunter",
       "updatedAt": null
@@ -114,7 +114,7 @@
       "agent": false,
       "id": "jB0f1VJ1LX",
       "path": "skill-build-ui-from-a-design.md",
-      "revision": "ab7b1a08171c61afe02d45e29c174c5fd8abde32224d6d7e27d111faf73ad736",
+      "revision": "ae18fda7beec87106ee0603e91fdbe1a229c07d36eeaa5f597ed45277506da0f",
       "sha256": "f3a31236983c2d009bf83962dcf55d94ea29a097241ff697d74fffa79effe677",
       "skill": true,
       "title": "Skill — Build UI from a Design",
@@ -164,7 +164,7 @@
       "agent": false,
       "id": "cPnAwyN3xu",
       "path": "skill-read-a-figcraft-design-view-only.md",
-      "revision": "e9804f7a0374220ca923b3e21e4f3141da56d0c5a290b9ed4b675caba4474d93",
+      "revision": "d0186fe4e2de968dbaf6d5af838e26acfe195f401d1555cdc0465470102a7506",
       "sha256": "8c43d6b69acde70c00203a91d2936a75222a811f474bf15c074e40cf339f147b",
       "skill": true,
       "title": "Skill — Read a FigCraft Design (View-Only)",
@@ -225,7 +225,7 @@
       "id": "AraMS7nUQo",
       "path": "type-design-analyzer.md",
       "revision": "29f994bb00d2b49f31b5053bf33c2a73d1111cd9787cbce66a4587918026aed9",
-      "sha256": "14db5097458efe1f64f24fc3071757c0162e06423c877d18b30e14b8ee6015e3",
+      "sha256": "84392abacac23e302dee2df7e6459b2a36f466d2f5d97c6dbf49f3132a66ba6e",
       "skill": true,
       "title": "type-design-analyzer",
       "updatedAt": null

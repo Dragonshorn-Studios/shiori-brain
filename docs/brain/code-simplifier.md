@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "code-simplifier"
+title: "Code Simplifier"
 shiori_source_id: "zqpMdeH5OL"
 ---
 
