@@ -24,7 +24,7 @@
       "agent": true,
       "id": "zqpMdeH5OL",
       "path": "code-simplifier.md",
-      "revision": "706602cd97558c773d4f8ab556f6244e894f67b781a2d64f20fd2619b25609c4",
+      "revision": "d15be322a79b9ab6739a4d835f9c24f50c128ddfc9fa719603e8c8209ba8240b",
       "sha256": "0784b1c49c6aa51eeeeb2c91215375df1a8f1a35e2e269158abf6ea527ffc864",
       "skill": true,
       "title": "code-simplifier",
@@ -64,8 +64,8 @@
       "agent": false,
       "id": "j4IXQ9l6wz",
       "path": "overview.md",
-      "revision": "6d9170e69a4574b3079a20f04fb6e643062b084184002a4c1a1255e313be2e63",
-      "sha256": "4b38c18e100b552c61b177849853f8503cfc03f6b8cd7c8c836444d9319badef",
+      "revision": "40e7f126acb1239b495e6b96c60a1fb3192941d1e500819935d12898e02d2e46",
+      "sha256": "53743c7394d7ad87ed6e2a41d4245921fd08b3ab3a39943e5a132b2060e271f9",
       "skill": false,
       "title": "Shared Architecture — Start Here",
       "updatedAt": null
@@ -112,12 +112,42 @@
     },
     {
       "agent": false,
+      "id": "jB0f1VJ1LX",
+      "path": "skill-build-ui-from-a-design.md",
+      "revision": "ab7b1a08171c61afe02d45e29c174c5fd8abde32224d6d7e27d111faf73ad736",
+      "sha256": "f3a31236983c2d009bf83962dcf55d94ea29a097241ff697d74fffa79effe677",
+      "skill": true,
+      "title": "Skill — Build UI from a Design",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
       "id": "z7IgB0vfO1",
       "path": "skill-comprehensive-pr-review.md",
       "revision": "818ab69daa96ca96cc1ec6f83e7b56374678eafbcaf636100a30032aa17ec919",
       "sha256": "2ded1e533b0fb9bcb14504e970efa9989906afddc796b2b79e108e7b9709cd52",
       "skill": true,
       "title": "Skill — Comprehensive PR Review",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
+      "id": "s0M7dJU7NQ",
+      "path": "skill-design-tokens-plain-css.md",
+      "revision": "a599355d5de566d350c417df3e0857c761a1a7b35fd1db887dd9ee2408ed7cf4",
+      "sha256": "485f484346e3e604f29aaa010644c875ce4fe70fc4dde54bb55d1b6466e88ff7",
+      "skill": true,
+      "title": "Skill — Design Tokens: Plain CSS",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
+      "id": "FeCIngmaI-",
+      "path": "skill-design-tokens-tailwind.md",
+      "revision": "13b473c20f0c7697e59b152bef9be4a1afe6bf399871472a46454cafb33a1e23",
+      "sha256": "8c5cf871d5e835e7396d1ec3fd0e77b36795b72fae6d1fdbb54d88ddadaa2e70",
+      "skill": true,
+      "title": "Skill — Design Tokens: Tailwind",
       "updatedAt": null
     },
     {
@@ -132,12 +162,52 @@
     },
     {
       "agent": false,
+      "id": "cPnAwyN3xu",
+      "path": "skill-read-a-figcraft-design-view-only.md",
+      "revision": "e9804f7a0374220ca923b3e21e4f3141da56d0c5a290b9ed4b675caba4474d93",
+      "sha256": "8c43d6b69acde70c00203a91d2936a75222a811f474bf15c074e40cf339f147b",
+      "skill": true,
+      "title": "Skill — Read a FigCraft Design (View-Only)",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
       "id": "zUln8DRF4P",
       "path": "skill-stacked-pr-workflow.md",
       "revision": "7fb17ff68db01ba50fae16dfecc3d720860387451a79ab57f589e5da01ca80a2",
       "sha256": "82e5e168e789bedbd78a3236348b3b90cf2826702f97cbcccdedde792fc73b7f",
       "skill": true,
       "title": "Skill — Stacked PR Workflow",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
+      "id": "y0Fk7N54pG",
+      "path": "skill-ui-in-flutter.md",
+      "revision": "7ae9038913c7791718d6113eefea99ff5290bdc5186ff4c9677e7d845a123b6e",
+      "sha256": "0f3bf7ac2308a586fdf86eb580633ca58d496dcec18a4617443351c7314403f7",
+      "skill": true,
+      "title": "Skill — UI in Flutter",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
+      "id": "byNKyHlhlD",
+      "path": "skill-ui-in-react-typescript.md",
+      "revision": "c203f78ddd410fb09364bad1e6885528bcd7a692d400436edb66b13833233672",
+      "sha256": "f24bc21a96c47a4815187742b8052154ec633d333a8389b4026f1825c785f761",
+      "skill": true,
+      "title": "Skill — UI in React + TypeScript",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
+      "id": "UpAosbdfHO",
+      "path": "skill-web-ui-checks-playwright-axe.md",
+      "revision": "c222422f02dbcb7137c5c7e17755efba48c8b24269457297d45ca1d760f5f8d3",
+      "sha256": "2cf290ec0d1e9c1e2d9b586cb249ee04da3d6e80012109c135c4072215745db6",
+      "skill": true,
+      "title": "Skill — Web UI Checks (Playwright + axe)",
       "updatedAt": null
     },
     {
@@ -154,7 +224,7 @@
       "agent": true,
       "id": "AraMS7nUQo",
       "path": "type-design-analyzer.md",
-      "revision": "6ec15a285ca26ca305ea4cf9b1d93fe1958868a7ee32b185ce22ba50b3a121f0",
+      "revision": "29f994bb00d2b49f31b5053bf33c2a73d1111cd9787cbce66a4587918026aed9",
       "sha256": "14db5097458efe1f64f24fc3071757c0162e06423c877d18b30e14b8ee6015e3",
       "skill": true,
       "title": "type-design-analyzer",
