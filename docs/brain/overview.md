@@ -25,6 +25,15 @@ AFFiNE is the source of truth. Shiori exports only this document and same-worksp
 - [Skill — Stacked PR Workflow](skill-stacked-pr-workflow.md))
 - [Skill — Comprehensive PR Review](skill-comprehensive-pr-review.md))
 
+## Design-to-code skills
+- [Skill — Read a FigCraft Design (View-Only)](skill-read-a-figcraft-design-view-only.md))
+- [Skill — Build UI from a Design](skill-build-ui-from-a-design.md))
+- [Skill — Design Tokens: Tailwind](skill-design-tokens-tailwind.md))
+- [Skill — Design Tokens: Plain CSS](skill-design-tokens-plain-css.md))
+- [Skill — UI in React + TypeScript](skill-ui-in-react-typescript.md))
+- [Skill — UI in Flutter](skill-ui-in-flutter.md))
+- [Skill — Web UI Checks (Playwright + axe)](skill-web-ui-checks-playwright-axe.md))
+
 ## Specialized review agents
 - [comment-analyzer](comment-analyzer.md))
 - [pr-test-analyzer](pr-test-analyzer.md))
