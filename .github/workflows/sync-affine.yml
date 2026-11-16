@@ -15,7 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Dragonshorn-Studios/shiori-github-action@v1.3.1
+      # v1.4.0-equivalent: current action main (installSupportFiles). No v1.4.0 tag exists; v1 still points at v1.3.1.
+      - uses: Dragonshorn-Studios/shiori-github-action@9d96c1f0fb961620be0b7accca352ffd5a2b705a
         with:
           affine-base-url: ${{ vars.AFFINE_BASE_URL }}
           affine-email: ${{ secrets.AFFINE_EMAIL }}
