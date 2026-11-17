@@ -1,0 +1,39 @@
+> Wires FigCraft design tokens into web projects without Tailwind: CSS custom properties from variable.export css, modes via a data attribute, and component styling for Go html/template or templ, static HTML, Blade without Tailwind, and React with CSS modules or plain stylesheets. Load it from Skill — Build UI from a Design when the repository has web UI but no Tailwind.
+
+# Design Tokens: Plain CSS
+
+Companion to [Skill — Build UI from a Design](skill-build-ui-from-a-design.md)). The core rules there still apply; this page covers CSS-variable wiring.
+
+## Does this apply?
+
+Use this skill when the repository renders web UI and the Tailwind check fails (no `tailwindcss` dependency, no `@import "tailwindcss";` or `@tailwind` directive, no `tailwind.config.*`, no `tailwindcss` binary in the build). Typical signs:
+- `go.mod` plus templates (`*.html`, `*.tmpl`, `templates/`), or `*.templ` files and `github.com/a-h/templ` in `go.mod`.
+- A static site folder with `.html` and `.css` files.
+- Blade views with their own stylesheets.
+- `package.json` with `react` and `*.module.css`, `*.css` or Sass files next to components.
+Do not add Tailwind, a CSS-in-JS library or a design-system package to make this easier.
+
+## Wire the tokens
+1. Export: `run_command {"command": "variable.export", "params": {"format": "css", "path": "/tmp/design/<file-id>/tokens.css"}}`. The default mode is on `:root`, every other mode on `[data-<collection>="<mode>"]`, for example `[data-fumika="Dark"]`. Numbers are in px.
+2. Save it as the project's tokens file (for example `web/static/css/tokens.css`, `assets/css/tokens.css`, `src/styles/tokens.css`) and load it before every other stylesheet. Regenerate it from the design when tokens change; project-only tokens go in a second file.
+3. Modes: set the attribute on `<html>`. Server-rendered apps set it from a cookie or user setting while rendering; static sites use a tiny inline script in `<head>` before the stylesheet so there is no flash. Without a stored choice, follow `prefers-color-scheme`.
+4. Sass projects keep custom properties as the source; Sass variables may alias them (`$accent: var(--color-accent);`), never the other way round.
+
+## Style components with the variables
+- Every colour, radius, spacing and font value is `var(--...)`: `.button { background: var(--color-accent); color: var(--color-on-accent); border-radius: var(--radius-md); }`. Use the names from the export.
+- One class or module per component and variant: `.button`, `.button--danger`, or `styles.danger` in a CSS module. Follow the naming the project already uses (BEM, modules, utility classes of its own).
+- Focus: `:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }`; never `outline: none` without a replacement.
+- Motion: wrap transitions in `@media (prefers-reduced-motion: no-preference) { ... }`.
+- Breakpoints: the project's media queries, else mobile first with `min-width` at 640, 768, 1024 and 1280px. Safe areas: `padding-bottom: max(16px, env(safe-area-inset-bottom));` with `viewport-fit=cover` in the viewport meta tag.
+- Reference code: `inspect.code` with `html` returns markup plus a `<style>` block with the layer's values. Read sizes and type from it; replace every raw hex with its token and every absolute position with flow layout.
+
+## Component units per stack
+- Go html/template: partials such as `{{define "button"}}<button class="button button--{{.Variant}}">{{.Label}}</button>{{end}}`, used with `{{template "button" .}}` and a small struct. The template engine escapes data; never build HTML strings by hand.
+- templ: `templ Button(p ButtonProps) { ... }`, then `templ generate`. Serve CSS with the repository's existing asset pattern (often `embed.FS`).
+- Static HTML: the site generator's includes if there is one; otherwise one canonical snippet per element, repeated with identical classes. No JavaScript framework just to get components.
+- Blade without Tailwind: anonymous components in `resources/views/components/` with `@props`, styled by the project's stylesheet.
+- React with CSS modules: see [Skill — UI in React + TypeScript](skill-ui-in-react-typescript.md)).
+
+## Checks
+- Search the diff for `#` colour literals and `px` values in component CSS that should be tokens.
+- Visual QA and accessibility: [Skill — Web UI Checks (Playwright + axe)](skill-web-ui-checks-playwright-axe.md)).

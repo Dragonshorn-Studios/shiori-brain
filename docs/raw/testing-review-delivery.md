@@ -1,0 +1,46 @@
+# Testing, Review & Delivery
+
+A shared delivery loop for Dragonshorn Studios repositories.
+
+## Test the contract
+- Test observable behavior and meaningful failure paths.
+- Use the repository's preferred test style and factories.
+- Do not replace integration coverage with mocks at the boundary that matters.
+- Avoid live third-party services in unit tests; use fakes and explicit integration suites.
+- Add regression coverage for bugs whenever practical.
+- Copy-only and layout-only exceptions are governed by project-local rules.
+
+## Verification order
+1. Focused test for the changed behavior.
+2. Formatter and linter for touched files.
+3. Type or static checks.
+4. Relevant package/module suite.
+5. Full repository suite and build when required by local instructions or CI.
+6. Browser, cross-platform or race checks when the product risk warrants them.
+
+Do not claim a check passed unless it actually ran. Report skipped or unavailable checks.
+
+## Review order
+
+Review the diff against:
+1. correctness and product contract;
+2. authorization, trust boundaries and secret handling;
+3. silent failures and recovery behavior;
+4. test quality and missing edge cases;
+5. type design and state invariants;
+6. comments and documentation accuracy;
+7. simplicity, naming and consistency with surrounding code.
+
+Critical, high and medium findings are resolved before delivery. Low-severity findings may be recorded separately when they are outside scope.
+
+## Git and pull requests
+- Keep one coherent concern per change or PR.
+- Inspect the staged diff before committing.
+- Use conventional, descriptive commits where the repository expects them.
+- Never force-push, merge, close or mark a PR ready without user authorization.
+- Preserve unrelated user changes.
+- State dependencies and recommended merge order for stacked changes.
+
+## Handoff
+
+Report the result, changed areas, verification performed, outstanding risk and the next human decision, if any.
