@@ -24,21 +24,32 @@ The doctor is read-only. It does not edit home-directory configuration or instal
 
 ## Install from the command line
 
-Only explicitly selected hosts are changed. OpenCode, MCode, and Vibe share one managed checkout at `~/.local/share/shiori/shiori-brain`; its skills are linked individually into the standard global `~/.agents/skills` directory. Codex and Claude Code use their plugin CLIs when the installed client version and account rollout expose them. Cursor, Claude Code, and Codex also receive MCP config under `--install` / `--update`:
+Only explicitly selected hosts are changed. OpenCode, MCode, and Vibe share one managed checkout at `~/.local/share/shiori/shiori-brain`; its skills are linked individually into the standard global `~/.agents/skills` directory. Codex and Claude Code use their plugin CLIs when the installed client version and account rollout expose them. Cursor, Devin, OpenCode, Claude Code, and Codex also receive MCP config under `--install` / `--update`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install opencode mcode vibe codex claude cursor
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install opencode mcode vibe codex claude cursor devin
 ```
 
 ```powershell
-$env:SHIORI_INSTALL='opencode,mcode,vibe,codex,claude,cursor'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+$env:SHIORI_INSTALL='opencode,mcode,vibe,codex,claude,cursor,devin'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
 For a checked-out script, use `sh scripts/shiori-doctor.sh --install opencode mcode vibe` or `.\scripts\shiori-doctor.ps1 -Install opencode,mcode,vibe`. Re-running install fast-forwards the managed checkout and reconciles skill links. Existing non-Shiori skill destinations are never overwritten.
 
+Valid host names: `opencode`, `mcode`, `vibe`, `codex`, `claude` (or `claude-code`), `cursor`, and `devin`. What each one does:
+
+| Host | `--install` effect |
+| --- | --- |
+| opencode | Managed checkout + Agent Skills links + MCP config in `~/.config/opencode/opencode.jsonc` |
+| mcode, vibe | Managed checkout + Agent Skills links |
+| codex | Plugin marketplace + plugin + MCP via `codex mcp add` |
+| claude | Plugin marketplace + plugin + MCP via `claude mcp add -s user` |
+| cursor | MCP config in `~/.cursor/mcp.json` |
+| devin | MCP config in `~/.config/devin/mcp_config.json` |
+
 ## Update installed hosts
 
-The installer records successful host selections. Update all recorded hosts without remembering the list:
+`--install` records each host it successfully sets up in `~/.local/state/shiori/installed-hosts`. `--update` re-runs the current doctor against those recorded hosts, including capabilities added after the original install. For example, a host installed before MCP support existed receives its MCP config on the next update. Update all recorded hosts without remembering the list:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --update
@@ -48,13 +59,13 @@ curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/ma
 $env:SHIORI_UPDATE='all'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
-Pass names after `--update`, or use PowerShell `-Update -UpdateTargets opencode,mcode`, to update only selected hosts. Checkout updates are always `git pull --ff-only`; an unexpected origin, dirty checkout, non-repository path, or conflicting skill destination stops the operation rather than deleting user data.
+Pass names after `--update`, or use PowerShell `-Update -UpdateTargets opencode,mcode`, to update only selected hosts. A bare `--update` also prints locally detected hosts that were never recorded, so newly installed tools are easy to pick up. Checkout updates are always `git pull --ff-only`; an unexpected origin, dirty checkout, non-repository path, or conflicting skill destination stops the operation rather than deleting user data.
 
 ## Native setup matrix
 
 | Host | Project use | Native reusable installation |
 | --- | --- | --- |
-| OpenCode | Automatic through `.agents/skills` | `--install opencode` uses the managed checkout and global Agent Skills links. |
+| OpenCode | Automatic through `.agents/skills` | `--install opencode` uses the managed checkout and global Agent Skills links, and writes MCP config to `~/.config/opencode/opencode.jsonc`. |
 | Codex / ChatGPT desktop | Repository skills work through `.agents/skills` | Run `codex plugin marketplace add Dragonshorn-Studios/shiori-brain`, then open `/plugins` and install **Shiori**. |
 | Claude Code | Automatic through `.claude/skills` and `.claude/agents` | Run `/plugin marketplace add Dragonshorn-Studios/shiori-brain`, then `/plugin install shiori@dragonshorn-brain`. |
 | ZCode | Install the generated plugin | Open **Settings -> Plugins -> Create -> Add marketplace**, enter `Dragonshorn-Studios/shiori-brain`, then install **Shiori**. |
@@ -62,15 +73,15 @@ Pass names after `--update`, or use PowerShell `-Update -UpdateTargets opencode,
 | MCode / MiniMax Code | Automatic through `.agents/skills` in this checkout | `--install mcode` uses the same managed checkout and global Agent Skills links. |
 | Windsurf | Automatic through `.windsurf/skills` | Keep the generated project adapter; no marketplace step is required. |
 | Vibe | Automatic through `.vibe/skills` | `--install vibe` uses the same managed checkout and global Agent Skills links. |
-| Devin | Automatic through committed `.devin/skills` in repository sessions | Devin may be cloud-only, so absence of a local executable is not an error. Connect this repository to the Devin workspace. |
+| Devin | Automatic through committed `.devin/skills` in repository sessions | Devin may be cloud-only, so absence of a local executable is not an error. Connect this repository to the Devin workspace. `--install devin` writes user-scope MCP config to `~/.config/devin/mcp_config.json`. |
 
 ## MCP servers
 
-The doctor can add a local stdio MCP client for the published Pages archive, plus Storytold Craft CLIs that are already on `PATH`. Default doctor mode is still read-only and does not launch Claude or Codex. MCP writes happen only under `--install` / `--update`: Cursor via `~/.cursor/mcp.json`, Claude Code via `claude mcp add -s user`, and Codex via `codex mcp add`. The shiori-brain server is `node <checkout>/packages/shiori-brain-mcp/src/index.js` from the managed checkout; it is not loaded from a package registry. Installed entries set `SHIORI_BRAIN_BASE_URL` to this project's Pages origin (`https://dragonshorn-studios.github.io/shiori-brain/`). Override with `SHIORI_BRAIN_BASE_URL` if Pages uses a custom domain. The installer fails instead of using another project's archive when that URL cannot be determined. Existing non-Shiori MCP entries are never overwritten.
+The doctor can add a local stdio MCP client for the published Pages archive, plus Storytold Craft CLIs that are already on `PATH`. Default doctor mode is still read-only and does not launch Claude or Codex. MCP writes happen only under `--install` / `--update`: Cursor via `~/.cursor/mcp.json`, Devin via `~/.config/devin/mcp_config.json`, OpenCode via `~/.config/opencode/opencode.jsonc` (`mcp.servers`; an existing `opencode.json` is updated in place instead. Fresh installs choose `.jsonc` so other tools' flat-schema OpenCode imports do not misread the file), Claude Code via `claude mcp add -s user`, and Codex via `codex mcp add`. The shiori-brain server is `node <checkout>/packages/shiori-brain-mcp/src/index.js` from the managed checkout; it is not loaded from a package registry. Installed entries set `SHIORI_BRAIN_BASE_URL` to this project's Pages origin (`https://dragonshorn-studios.github.io/shiori-brain/`). Override with `SHIORI_BRAIN_BASE_URL` if Pages uses a custom domain. The installer fails instead of using another project's archive when that URL cannot be determined. Existing non-Shiori MCP entries are never overwritten.
 
 | Server | Command | Purpose | When the doctor adds it |
 | --- | --- | --- | --- |
-| `shiori-brain` | `node ~/.local/share/shiori/shiori-brain/packages/shiori-brain-mcp/src/index.js` | Search and read the published Shiori knowledge archive | On `--install` / `--update` for Cursor, Claude Code, and Codex |
+| `shiori-brain` | `node ~/.local/share/shiori/shiori-brain/packages/shiori-brain-mcp/src/index.js` | Search and read the published Shiori knowledge archive | On `--install` / `--update` for Cursor, Devin, OpenCode, Claude Code, and Codex |
 | `figcraft` | `figcraft-cli mcp` | Interface design (FigCraft) | Only when `figcraft-cli` is on `PATH` |
 | `cadcraft` | `cadcraft-cli mcp` | CAD and drafting (CadCraft) | Only when `cadcraft-cli` is on `PATH` |
 | `deckcraft` | `deckcraft-cli mcp` | Slide decks (DeckCraft) | Only when `deckcraft-cli` is on `PATH` |

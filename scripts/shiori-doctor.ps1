@@ -132,23 +132,55 @@ function Test-SharedSkillsInstalled {
     return $true
 }
 
+function Test-HostDetected {
+    param([string]$Target)
+    switch ($Target) {
+        'opencode' { return ((Get-Command opencode -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.config\opencode')) }
+        'mcode' { return ((Get-Command mcode -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.minimax')) }
+        'vibe' { return ((Get-Command vibe -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.vibe')) }
+        'codex' { return ((Get-Command codex -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.codex')) }
+        { $_ -in @('claude', 'claude-code') } { return ((Get-Command claude -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.claude')) }
+        'cursor' { return ((Get-Command cursor -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.cursor')) }
+        'devin' { return ((Get-Command devin -ErrorAction SilentlyContinue) -ne $null) -or (Test-Path -LiteralPath (Join-Path $HOME '.config\devin')) -or (Test-Path -LiteralPath (Join-Path $HOME '.devin')) }
+        default { return $false }
+    }
+}
+
+function Test-McpConfigured {
+    param([string]$Provider)
+    $Files = switch ($Provider) {
+        'cursor' { @('.cursor\mcp.json') }
+        'devin' { @('.config\devin\mcp_config.json') }
+        'opencode' { @('.config\opencode\opencode.json', '.config\opencode\opencode.jsonc') }
+        { $_ -in @('claude', 'claude-code') } { @('.claude.json') }
+        'codex' { @('.codex\config.toml') }
+        default { @() }
+    }
+    foreach ($File in $Files) {
+        $Path = Join-Path $HOME $File
+        if ((Test-Path -LiteralPath $Path) -and (Select-String -LiteralPath $Path -Pattern 'shiori-brain' -SimpleMatch -Quiet)) { return $true }
+    }
+    return $false
+}
+
 function Get-ShioriInstallStatus {
     param([string]$Provider)
+    $Parts = @()
     switch ($Provider) {
         { $_ -in @('opencode', 'mcode', 'vibe') } {
-            if (Test-SharedSkillsInstalled) { return 'installed (managed Agent Skills)' }
-            return 'not installed'
+            if (Test-SharedSkillsInstalled) { $Parts += 'managed Agent Skills' }
         }
         'codex' {
-            if (Test-RecordedHost codex) { return 'installed (recorded native plugin)' }
-            return 'unknown (not installed by this doctor)'
+            if (Test-RecordedHost codex) { $Parts += 'recorded native plugin' }
         }
         'claude' {
-            if (Test-RecordedHost claude) { return 'installed (recorded native plugin)' }
-            return 'unknown (not installed by this doctor)'
+            if (Test-RecordedHost claude) { $Parts += 'recorded native plugin' }
         }
-        default { return 'unknown (no local status API)' }
     }
+    if ($Provider -in @('opencode', 'cursor', 'devin', 'claude', 'codex') -and (Test-McpConfigured $Provider)) { $Parts += 'MCP configured' }
+    if ($Parts.Count -gt 0) { return 'installed (' + ($Parts -join ' + ') + ')' }
+    if ($Provider -in @('opencode', 'mcode', 'vibe', 'cursor', 'devin')) { return 'not installed' }
+    return 'unknown (no local status API)'
 }
 
 function Sync-SharedSkills {
@@ -218,6 +250,9 @@ function Assert-PluginInstaller {
         }
         'cursor' {
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Cannot install Cursor MCP: node is not available.' }
+        }
+        'devin' {
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Cannot install Devin MCP: node is not available.' }
         }
         default { throw "No command-line installer is available for: $Target" }
     }
@@ -293,23 +328,30 @@ Show-AgentStatus 'Cursor' cursor '.cursor' cursor
 Show-AgentStatus 'MCode / MiniMax' mcode '.minimax' mcode
 Show-AgentStatus 'Windsurf' windsurf '.windsurf' windsurf
 Show-AgentStatus 'Vibe' vibe '.vibe' vibe
-Show-AgentStatus 'Devin' devin '.devin' devin -Cloud
+Show-AgentStatus 'Devin' devin '.config\devin' devin -Cloud
 
 Write-Host ''
 Write-Host 'MCP servers'
-Write-Host '  Installed under -Install / -Update. A read-only run does not launch host CLIs.'
+Write-Host '  Installed under -Install / -Update for cursor, devin, opencode, claude, and codex. A read-only run does not launch host CLIs.'
 
 Write-Host @"
 
+How -Install and -Update work
+  -Install <hosts>  set up the named hosts now. Valid names: opencode, mcode, vibe, codex, claude, cursor, devin.
+  -Update [hosts]   re-run the installer for every host recorded by an earlier -Install, or only the hosts
+                    passed through -UpdateTargets or SHIORI_UPDATE. Capabilities added by a newer doctor
+                    (for example MCP config) are applied on update.
+  Host names may be comma- or space-separated; SHIORI_INSTALL / SHIORI_UPDATE are the pipe equivalents.
+
 Recommended native setup
-  OpenCode: select -Install opencode to clone/update Shiori and link its skills through ~/.agents/skills.
+  OpenCode: select -Install opencode to link skills through ~/.agents/skills and write MCP config.
   Codex:    codex plugin marketplace add $Repository ; then open /plugins and install Shiori. -Install codex also writes MCP config.
   Claude:   /plugin marketplace add $Repository ; then /plugin install shiori@$Marketplace. -Install claude also writes MCP config.
   ZCode:    Settings -> Plugins -> Create -> Add marketplace -> $Repository; install Shiori.
   Cursor:   Settings -> Plugins; add https://github.com/$Repository; install Shiori. -Install cursor writes MCP config.
   MCode:    select -Install mcode to use the same managed checkout and global Agent Skills links.
   Vibe:     select -Install vibe to use the same managed checkout and global Agent Skills links.
-  Devin:    connect this repository to the cloud workspace; no local executable is required.
+  Devin:    -Install devin writes user-scope MCP config; the cloud workspace needs no local CLI.
 
 Full instructions: $GuideUrl
 "@
@@ -321,18 +363,26 @@ if ($env:SHIORI_UPDATE) { $Update = $true }
 if ($Install.Count -gt 0 -and $Update) { throw 'Choose either install or update.' }
 $Operation = if ($Update) { 'update' } elseif ($Install.Count -gt 0) { 'install' } else { '' }
 $Targets = if ($Operation -eq 'update') { @($UpdateTargets + $EnvironmentUpdate) } else { @($Install) }
+$UpdateFromRecorded = $false
 if ($Operation -eq 'update' -and $Targets.Count -eq 0) {
     if (-not (Test-Path -LiteralPath $InstalledHostsFile)) { throw 'No recorded Shiori installations to update.' }
     $Targets = @(Get-Content -LiteralPath $InstalledHostsFile)
+    $UpdateFromRecorded = $true
 }
 $Targets = @($Targets | ForEach-Object { $_.Trim().ToLowerInvariant() } | Where-Object { $_ } | ForEach-Object { if ($_ -eq 'claude-code') { 'claude' } else { $_ } } | Select-Object -Unique)
-if ($Operation -eq 'install' -and $Targets.Count -eq 0) { throw 'Pass at least one installer: opencode, mcode, vibe, codex, claude, or cursor.' }
+if ($Operation -eq 'install' -and $Targets.Count -eq 0) { throw 'Pass at least one installer: opencode, mcode, vibe, codex, claude, cursor, or devin.' }
+if ($UpdateFromRecorded) {
+    $DetectedHints = @('opencode', 'mcode', 'vibe', 'codex', 'claude', 'cursor', 'devin') | Where-Object {
+        ($_ -notin $Targets) -and -not (Test-RecordedHost $_) -and (Test-HostDetected $_)
+    }
+    if ($DetectedHints.Count -gt 0) { Write-Host "Detected locally but not recorded: $($DetectedHints -join ', ') - pass them to -Install or -Update to enable their features." }
+}
 if ($Operation) {
     foreach ($Target in $Targets) { Assert-PluginInstaller $Target }
     Write-Host ''
     Write-Host "Selected operation: $Operation"
     $SharedTargets = @($Targets | Where-Object { $_ -in @('opencode', 'mcode', 'vibe') })
-    $McpTargets = @($Targets | Where-Object { $_ -in @('cursor', 'claude', 'codex') })
+    $McpTargets = @($Targets | Where-Object { $_ -in @('cursor', 'claude', 'codex', 'opencode', 'devin') })
     if ($SharedTargets.Count -gt 0) {
         if ($Operation -eq 'update' -and -not (Test-Path -LiteralPath (Join-Path $ManagedCheckout '.git'))) { throw "No managed checkout exists to update: $ManagedCheckout" }
         Update-ManagedCheckout
@@ -346,10 +396,12 @@ if ($Operation) {
     }
     foreach ($Target in $Targets) {
         switch (($Operation + ':' + $Target)) {
-            { $_ -in @('install:opencode', 'install:mcode', 'install:vibe', 'update:opencode', 'update:mcode', 'update:vibe') } { Add-RecordedHost $Target }
+            { $_ -in @('install:opencode', 'update:opencode') } { Add-RecordedHost opencode; Invoke-McpCli -McpArgs @('install', '--host', 'opencode') }
+            { $_ -in @('install:mcode', 'install:vibe', 'update:mcode', 'update:vibe') } { Add-RecordedHost $Target }
             'install:codex' { Install-CodexPlugin; Invoke-McpCli -McpArgs @('install', '--host', 'codex') }
             'install:claude' { Install-ClaudePlugin; Invoke-McpCli -McpArgs @('install', '--host', 'claude') }
             { $_ -in @('install:cursor', 'update:cursor') } { Invoke-McpCli -McpArgs @('install', '--host', 'cursor'); Add-RecordedHost cursor }
+            { $_ -in @('install:devin', 'update:devin') } { Invoke-McpCli -McpArgs @('install', '--host', 'devin'); Add-RecordedHost devin }
             'update:codex' { Update-CodexPlugin; Invoke-McpCli -McpArgs @('install', '--host', 'codex') }
             'update:claude' { Update-ClaudePlugin; Invoke-McpCli -McpArgs @('install', '--host', 'claude') }
         }
