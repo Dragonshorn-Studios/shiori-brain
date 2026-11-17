@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "silent-failure-hunter"
+title: "Silent Failure Hunter"
 shiori_source_id: "s-yBwYR5WE"
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "pr-test-analyzer"
+title: "PR Test Analyzer"
 shiori_source_id: "5y2cid6W7c"
 ---
 
