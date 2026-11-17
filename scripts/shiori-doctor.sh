@@ -3,12 +3,15 @@ set -eu
 
 repository="${SHIORI_REPOSITORY:-Dragonshorn-Studios/shiori-brain}"
 marketplace="${SHIORI_MARKETPLACE:-dragonshorn-brain}"
+default_archive_url='https://dragonshorn-studios.github.io/shiori-brain/'
 guide_url="https://github.com/$repository/blob/main/AGENT-SETUP.md"
 checkout="${SHIORI_CHECKOUT:-$HOME/.local/share/shiori/shiori-brain}"
 state_root="${SHIORI_STATE_HOME:-$HOME/.local/state/shiori}"
 skills_root="${SHIORI_SKILLS_HOME:-$HOME/.agents/skills}"
 installed_hosts_file="$state_root/installed-hosts"
 managed_skills_file="$state_root/managed-skills"
+mcp_helper_tmp=''
+mcp_helper_dir=''
 if [ -d '.agents/skills' ] && [ -d 'plugins/shiori' ]; then
   context='checkout'
   project_hint='project adapters are ready in this checkout'
@@ -19,6 +22,68 @@ fi
 
 has_command() { command -v "$1" >/dev/null 2>&1; }
 has_home() { [ -e "$HOME/$1" ]; }
+cleanup_mcp_helper() {
+  [ -z "$mcp_helper_tmp" ] || rm -f "$mcp_helper_tmp"
+  [ -z "$mcp_helper_dir" ] || rm -rf "$mcp_helper_dir"
+}
+trap cleanup_mcp_helper EXIT
+resolve_mcp_helper() {
+  if [ -n "${SHIORI_MCP_HELPER:-}" ] && [ -f "$SHIORI_MCP_HELPER" ]; then
+    printf '%s\n' "$SHIORI_MCP_HELPER"
+    return 0
+  fi
+  if [ -f 'scripts/shiori-mcp.mjs' ]; then
+    printf '%s\n' 'scripts/shiori-mcp.mjs'
+    return 0
+  fi
+  has_command curl || { printf '%s\n' 'Cannot load the Shiori MCP helper: curl is not available.' >&2; return 1; }
+  mcp_helper_dir=$(mktemp -d) || return 1
+  mcp_helper_tmp="$mcp_helper_dir/shiori-mcp.mjs"
+  curl -fsSL "https://raw.githubusercontent.com/$repository/main/scripts/shiori-mcp.mjs" > "$mcp_helper_tmp" || return 1
+  printf '%s\n' "$mcp_helper_tmp"
+}
+archive_url() {
+  if [ -n "${SHIORI_BRAIN_BASE_URL:-}" ]; then
+    printf '%s\n' "$SHIORI_BRAIN_BASE_URL"
+    return 0
+  fi
+  if [ -n "$default_archive_url" ]; then
+    printf '%s\n' "$default_archive_url"
+    return 0
+  fi
+  owner=${repository%%/*}
+  repo=${repository#*/}
+  [ -n "$owner" ] && [ -n "$repo" ] && [ "$repository" != "$owner" ] || return 1
+  owner_lc=$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]')
+  repo_lc=$(printf '%s' "$repo" | tr '[:upper:]' '[:lower:]')
+  if [ "$repo_lc" = "$owner_lc.github.io" ]; then
+    printf 'https://%s.github.io/\n' "$owner_lc"
+    return 0
+  fi
+  printf 'https://%s.github.io/%s/\n' "$owner_lc" "$repo"
+}
+is_allowed_archive_url() {
+  lowered=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
+  case $lowered in
+    https://*) return 0 ;;
+  esac
+  rest=${lowered#http://}
+  [ "$rest" != "$lowered" ] || return 1
+  hostport=${rest%%/*}
+  case $hostport in
+    localhost|localhost:*|127.0.0.1|127.0.0.1:*) return 0 ;;
+    \[::1\]|\[::1\]:*) return 0 ;;
+  esac
+  return 1
+}
+run_mcp_cli() {
+  has_command node || { printf '%s\n' 'Skipping MCP config: node is not available.'; return 0; }
+  helper=$(resolve_mcp_helper) || return 1
+  pages_origin=$(archive_url) || pages_origin=''
+  [ -n "$pages_origin" ] || { printf '%s\n' 'Set SHIORI_BRAIN_BASE_URL to the published Pages origin before installing MCP servers. The installer will not fall back to another project archive.' >&2; return 1; }
+  is_allowed_archive_url "$pages_origin" || { printf '%s\n' 'SHIORI_BRAIN_BASE_URL must be an https URL (http is allowed only for localhost).' >&2; return 1; }
+  node "$helper" "$@" --home "$HOME" --checkout "$checkout" --base-url "$pages_origin"
+}
 contains_text() {
   case $1 in
     *"$2"*) return 0 ;;
@@ -146,7 +211,7 @@ if [ "$#" -gt 0 ]; then
   selected_targets="$*"
 fi
 if [ "$operation" = 'install' ] && [ -z "$selected_targets" ]; then
-  printf '%s\n' 'Pass at least one installer: opencode, mcode, vibe, codex, or claude.' >&2
+  printf '%s\n' 'Pass at least one installer: opencode, mcode, vibe, codex, claude, or cursor.' >&2
   exit 2
 fi
 if [ "$operation" = 'update' ] && [ -z "$selected_targets" ]; then
@@ -171,6 +236,9 @@ assert_installer() {
       else
         has_command claude && claude plugin marketplace add --help >/dev/null 2>&1 && claude plugin install --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot install Claude plugin: this CLI build or account does not expose plugin installation.' >&2; return 1; }
       fi
+      ;;
+    cursor)
+      has_command node || { printf '%s\n' 'Cannot install Cursor MCP: node is not available.' >&2; return 1; }
       ;;
     *) printf 'No command-line installer is available for: %s\n' "$1" >&2; return 1 ;;
   esac
@@ -231,14 +299,16 @@ row 'Windsurf' windsurf '.windsurf' local windsurf
 row 'Vibe' vibe '.vibe' local vibe
 row 'Devin' devin '.devin' cloud devin
 
+printf '%s\n' '' 'MCP servers' '  Installed under --install / --update. A read-only run does not launch host CLIs.'
+
 printf '%s\n' \
   '' \
   'Recommended native setup' \
   '  OpenCode: select --install opencode to clone/update Shiori and link its skills through ~/.agents/skills.' \
-  "  Codex:    codex plugin marketplace add $repository ; then open /plugins and install Shiori." \
-  "  Claude:   /plugin marketplace add $repository ; then /plugin install shiori@$marketplace." \
+  "  Codex:    codex plugin marketplace add $repository ; then open /plugins and install Shiori. --install codex also writes MCP config." \
+  "  Claude:   /plugin marketplace add $repository ; then /plugin install shiori@$marketplace. --install claude also writes MCP config." \
   "  ZCode:    Settings -> Plugins -> Create -> Add marketplace -> $repository; install Shiori." \
-  "  Cursor:   Settings -> Plugins; add https://github.com/$repository; install Shiori." \
+  "  Cursor:   Settings -> Plugins; add https://github.com/$repository; install Shiori. --install cursor writes MCP config." \
   '  MCode:    select --install mcode to use the same managed checkout and global Agent Skills links.' \
   '  Vibe:     select --install vibe to use the same managed checkout and global Agent Skills links.' \
   '  Devin:    connect this repository to the cloud workspace; no local executable is required.' \
@@ -250,22 +320,31 @@ if [ -n "$operation" ]; then
   previous_ifs=$IFS
   IFS=', '
   shared_skills_selected='false'
+  mcp_selected='false'
   for selected_target in $selected_targets; do
     assert_installer "$selected_target"
     case $selected_target in opencode|mcode|vibe) shared_skills_selected='true' ;; esac
+    case $selected_target in cursor|claude|claude-code|codex) mcp_selected='true' ;; esac
   done
   if [ "$shared_skills_selected" = true ]; then
     [ "$operation" != update ] || [ -d "$checkout/.git" ] || { printf 'No managed checkout exists to update: %s\n' "$checkout" >&2; exit 2; }
     ensure_checkout
     sync_shared_skills
   fi
+  if [ "$mcp_selected" = true ]; then
+    mcp_script="$checkout/packages/shiori-brain-mcp/src/index.js"
+    if [ ! -f "$mcp_script" ]; then ensure_checkout; fi
+    if [ "$operation" = update ] && [ -d "$checkout/.git" ]; then ensure_checkout; fi
+    [ -f "$mcp_script" ] || { printf 'Shiori checkout is missing the MCP server: %s\n' "$mcp_script" >&2; exit 1; }
+  fi
   for selected_target in $selected_targets; do
     case "$operation:$selected_target" in
       install:opencode|install:mcode|install:vibe|update:opencode|update:mcode|update:vibe) record_host "$selected_target" ;;
-      install:codex) install_codex ;;
-      install:claude|install:claude-code) install_claude ;;
-      update:codex) update_codex ;;
-      update:claude|update:claude-code) update_claude ;;
+      install:codex) install_codex; run_mcp_cli install --host codex ;;
+      install:claude|install:claude-code) install_claude; run_mcp_cli install --host claude ;;
+      install:cursor|update:cursor) run_mcp_cli install --host cursor; record_host cursor ;;
+      update:codex) update_codex; run_mcp_cli install --host codex ;;
+      update:claude|update:claude-code) update_claude; run_mcp_cli install --host claude ;;
     esac
   done
   IFS=$previous_ifs

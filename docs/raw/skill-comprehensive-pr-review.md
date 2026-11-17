@@ -1,0 +1,86 @@
+> Orchestrate a focused review of a pull request or local diff with the specialized Shiori review agents. Use when asked to review changes, audit code quality, or check work before commit or merge.
+
+# Comprehensive PR Review
+
+Use the generated review agents as independent specialists. Select only roles justified by the diff, keep every finding tied to evidence, and aggregate the results into one actionable report.
+
+## Inputs
+
+Accept an optional review scope:
+- `comments` — comment and documentation accuracy.
+- `tests` — behavioral coverage and test quality.
+- `errors` — error propagation, recovery, retries, and silent failures.
+- `types` — public types, schemas, state machines, and invariants.
+- `code` — general correctness and repository compliance.
+- `simplify` — behavior-preserving cleanup after correctness review.
+- `all` — every applicable read-only reviewer; this is the default.
+
+The current user request, repository-local `AGENTS.md` and other project instructions take precedence.
+
+## Establish the review target
+1. Read repository instructions and CI configuration.
+2. Determine the exact comparison base: staged diff, working-tree diff, branch base, commit range, or pull request.
+3. Inspect the changed-file list and the complete diff.
+4. Read the issue or acceptance criteria when available.
+5. Record checks already run; never claim a command passed without executing it.
+
+If the target or base is ambiguous and choosing incorrectly would materially change the review, ask before continuing.
+
+## Select agents
+
+Always use:
+- `code-reviewer` for correctness, scope, security, compatibility, and repository compliance.
+
+Add when applicable:
+- `comment-analyzer` when comments, docstrings, Markdown, examples, help text, or public documentation changed, or nearby prose may have become stale.
+- `pr-test-analyzer` when production behavior changed, tests changed, or missing regression protection is plausible.
+- `silent-failure-hunter` when the diff touches errors, retries, fallbacks, async work, subprocesses, network/filesystem boundaries, logging, or partial success.
+- `type-design-analyzer` when public types, schemas, configuration shapes, protocol messages, models, or state machines changed.
+- `code-simplifier` only after critical, high, and medium correctness findings are resolved, and only when the user authorized edits.
+
+Do not launch a specialist solely to satisfy a checklist. State why each selected role applies.
+
+## Run the review
+
+Run review agents sequentially by default and wait for each report before launching the next agent. Use parallel execution only when the user explicitly asks for parallel review. Do not infer permission for parallel execution from an all scope, time pressure, or host support.
+
+Give each agent the same review base, acceptance criteria, changed-file list, and relevant repository instructions. Ask agents to stay within the diff and immediate context and to return exact file/line evidence.
+
+`code-simplifier` is a mutating role. Never run it in parallel with reviewers and never use it to hide or work around an unresolved defect.
+
+## Validate findings
+
+Before reporting a finding:
+1. Confirm it is introduced or exposed by the reviewed change.
+2. Verify the cited line and triggering scenario.
+3. Check surrounding code and tests for an existing guard.
+4. Remove duplicates across agent reports.
+5. Calibrate severity by impact and likelihood.
+6. Reject style preferences that lack a concrete consequence.
+
+If an agent report is uncertain, investigate it rather than forwarding it verbatim.
+
+## Aggregate output
+
+Report in this order:
+1. **Critical and high findings** — must be resolved before merge.
+2. **Medium findings** — real defects or important missing recovery/coverage.
+3. **Low findings and suggestions** — worthwhile but non-blocking.
+4. **Open questions and assumptions.**
+5. **Verification performed and checks not run.**
+6. **Positive observations and concise change summary.**
+7. **Recommended action plan.**
+
+Every finding must include severity, exact file and line, triggering condition, impact, evidence, and a concrete remediation. If there are no findings, say so explicitly and name residual risks.
+
+## Re-review loop
+
+After fixes, rerun only the agents relevant to the changed areas plus `code-reviewer`. Confirm that the fix did not weaken tests, error handling, or compatibility. Run `code-simplifier` last, then execute the repository's focused checks and final diff review.
+
+## Host compatibility
+
+Shiori publishes each `agent`-tagged AFFiNE document as:
+- a native subagent for hosts whose plugin format supports `agents/*.md` (Claude Code and ZCode);
+- a portable Agent Skill for Codex-compatible tools, Cursor, Windsurf, Vibe, Devin, and other Agent Skills hosts.
+
+On hosts without native subagents, invoke the matching generated skill as the specialist role and follow the same aggregation workflow. AFFiNE is canonical; do not edit generated agent or skill files by hand.

@@ -8,15 +8,60 @@ param(
 
 $Repository = if ($env:SHIORI_REPOSITORY) { $env:SHIORI_REPOSITORY } else { 'Dragonshorn-Studios/shiori-brain' }
 $Marketplace = if ($env:SHIORI_MARKETPLACE) { $env:SHIORI_MARKETPLACE } else { 'dragonshorn-brain' }
+$DefaultArchiveUrl = 'https://dragonshorn-studios.github.io/shiori-brain/'
 $GuideUrl = "https://github.com/$Repository/blob/main/AGENT-SETUP.md"
 $ManagedCheckout = if ($env:SHIORI_CHECKOUT) { $env:SHIORI_CHECKOUT } else { Join-Path $HOME '.local/share/shiori/shiori-brain' }
 $StateRoot = if ($env:SHIORI_STATE_HOME) { $env:SHIORI_STATE_HOME } else { Join-Path $HOME '.local/state/shiori' }
 $SkillsRoot = if ($env:SHIORI_SKILLS_HOME) { $env:SHIORI_SKILLS_HOME } else { Join-Path $HOME '.agents/skills' }
 $InstalledHostsFile = Join-Path $StateRoot 'installed-hosts'
 $ManagedSkillsFile = Join-Path $StateRoot 'managed-skills'
+$McpHelperTemp = $null
 $LocalCheckout = (Test-Path -LiteralPath '.agents\skills') -and (Test-Path -LiteralPath 'plugins\shiori')
 $Mode = if ($LocalCheckout) { 'checkout' } else { 'remote' }
 $ProjectHint = if ($LocalCheckout) { 'project adapters are ready in this checkout' } else { 'no Shiori checkout detected; use a marketplace installation below' }
+
+function Get-McpHelper {
+    if ($env:SHIORI_MCP_HELPER -and (Test-Path -LiteralPath $env:SHIORI_MCP_HELPER)) { return $env:SHIORI_MCP_HELPER }
+    if (Test-Path -LiteralPath 'scripts\shiori-mcp.mjs') { return (Resolve-Path -LiteralPath 'scripts\shiori-mcp.mjs').Path }
+    $script:McpHelperTemp = Join-Path ([IO.Path]::GetTempPath()) ('shiori-mcp-' + [guid]::NewGuid().ToString() + '.mjs')
+    Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/$Repository/main/scripts/shiori-mcp.mjs" -OutFile $script:McpHelperTemp
+    return $script:McpHelperTemp
+}
+
+function Get-ShioriArchiveUrl {
+    if ($env:SHIORI_BRAIN_BASE_URL) { return $env:SHIORI_BRAIN_BASE_URL }
+    if ($DefaultArchiveUrl) { return $DefaultArchiveUrl }
+    $Parts = @($Repository -split '/', 2)
+    if ($Parts.Count -ne 2 -or -not $Parts[0] -or -not $Parts[1]) { return '' }
+    $Owner = $Parts[0].ToLowerInvariant()
+    $Repo = $Parts[1]
+    if ($Repo.ToLowerInvariant() -eq ($Owner + '.github.io')) { return "https://$Owner.github.io/" }
+    return "https://$Owner.github.io/$Repo/"
+}
+
+function Test-ShioriArchiveUrl {
+    param([string]$Url)
+    try { $Parsed = [Uri]$Url } catch { return $false }
+    if (-not $Parsed.IsAbsoluteUri) { return $false }
+    if ($Parsed.Scheme -eq 'https') { return $true }
+    if ($Parsed.Scheme -ne 'http') { return $false }
+    $HostName = $Parsed.Host.Trim('[]').ToLowerInvariant()
+    return @('localhost', '127.0.0.1', '::1') -contains $HostName
+}
+
+function Invoke-McpCli {
+    param([string[]]$McpArgs)
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Write-Host 'Skipping MCP config: node is not available.'
+        return
+    }
+    $ArchiveUrl = Get-ShioriArchiveUrl
+    if (-not $ArchiveUrl) { throw 'Set SHIORI_BRAIN_BASE_URL to the published Pages origin before installing MCP servers. The installer will not fall back to another project''s archive.' }
+    if (-not (Test-ShioriArchiveUrl $ArchiveUrl)) { throw 'SHIORI_BRAIN_BASE_URL must be an https URL (http is allowed only for localhost).' }
+    $Helper = Get-McpHelper
+    & node $Helper @McpArgs --home $HOME --checkout $ManagedCheckout --base-url $ArchiveUrl
+    if ($LASTEXITCODE -ne 0) { throw "Shiori MCP helper failed with exit code $LASTEXITCODE" }
+}
 
 function Show-AgentStatus {
     param([string]$Name, [string]$Command, [string]$HomePath, [string]$Provider, [switch]$Cloud)
@@ -171,6 +216,9 @@ function Assert-PluginInstaller {
                 if ($LASTEXITCODE -ne 0) { throw 'Cannot install Claude plugin: this CLI build or account does not expose plugin installation.' }
             }
         }
+        'cursor' {
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Cannot install Cursor MCP: node is not available.' }
+        }
         default { throw "No command-line installer is available for: $Target" }
     }
 }
@@ -247,14 +295,18 @@ Show-AgentStatus 'Windsurf' windsurf '.windsurf' windsurf
 Show-AgentStatus 'Vibe' vibe '.vibe' vibe
 Show-AgentStatus 'Devin' devin '.devin' devin -Cloud
 
+Write-Host ''
+Write-Host 'MCP servers'
+Write-Host '  Installed under -Install / -Update. A read-only run does not launch host CLIs.'
+
 Write-Host @"
 
 Recommended native setup
   OpenCode: select -Install opencode to clone/update Shiori and link its skills through ~/.agents/skills.
-  Codex:    codex plugin marketplace add $Repository ; then open /plugins and install Shiori.
-  Claude:   /plugin marketplace add $Repository ; then /plugin install shiori@$Marketplace.
+  Codex:    codex plugin marketplace add $Repository ; then open /plugins and install Shiori. -Install codex also writes MCP config.
+  Claude:   /plugin marketplace add $Repository ; then /plugin install shiori@$Marketplace. -Install claude also writes MCP config.
   ZCode:    Settings -> Plugins -> Create -> Add marketplace -> $Repository; install Shiori.
-  Cursor:   Settings -> Plugins; add https://github.com/$Repository; install Shiori.
+  Cursor:   Settings -> Plugins; add https://github.com/$Repository; install Shiori. -Install cursor writes MCP config.
   MCode:    select -Install mcode to use the same managed checkout and global Agent Skills links.
   Vibe:     select -Install vibe to use the same managed checkout and global Agent Skills links.
   Devin:    connect this repository to the cloud workspace; no local executable is required.
@@ -274,24 +326,32 @@ if ($Operation -eq 'update' -and $Targets.Count -eq 0) {
     $Targets = @(Get-Content -LiteralPath $InstalledHostsFile)
 }
 $Targets = @($Targets | ForEach-Object { $_.Trim().ToLowerInvariant() } | Where-Object { $_ } | ForEach-Object { if ($_ -eq 'claude-code') { 'claude' } else { $_ } } | Select-Object -Unique)
-if ($Operation -eq 'install' -and $Targets.Count -eq 0) { throw 'Pass at least one installer: opencode, mcode, vibe, codex, or claude.' }
+if ($Operation -eq 'install' -and $Targets.Count -eq 0) { throw 'Pass at least one installer: opencode, mcode, vibe, codex, claude, or cursor.' }
 if ($Operation) {
     foreach ($Target in $Targets) { Assert-PluginInstaller $Target }
     Write-Host ''
     Write-Host "Selected operation: $Operation"
     $SharedTargets = @($Targets | Where-Object { $_ -in @('opencode', 'mcode', 'vibe') })
+    $McpTargets = @($Targets | Where-Object { $_ -in @('cursor', 'claude', 'codex') })
     if ($SharedTargets.Count -gt 0) {
         if ($Operation -eq 'update' -and -not (Test-Path -LiteralPath (Join-Path $ManagedCheckout '.git'))) { throw "No managed checkout exists to update: $ManagedCheckout" }
         Update-ManagedCheckout
         Sync-SharedSkills
     }
+    if ($McpTargets.Count -gt 0) {
+        $McpScript = Join-Path $ManagedCheckout 'packages/shiori-brain-mcp/src/index.js'
+        if (-not (Test-Path -LiteralPath $McpScript)) { Update-ManagedCheckout }
+        if ($Operation -eq 'update' -and (Test-Path -LiteralPath (Join-Path $ManagedCheckout '.git'))) { Update-ManagedCheckout }
+        if (-not (Test-Path -LiteralPath $McpScript)) { throw "Shiori checkout is missing the MCP server: $McpScript" }
+    }
     foreach ($Target in $Targets) {
         switch (($Operation + ':' + $Target)) {
             { $_ -in @('install:opencode', 'install:mcode', 'install:vibe', 'update:opencode', 'update:mcode', 'update:vibe') } { Add-RecordedHost $Target }
-            'install:codex' { Install-CodexPlugin }
-            'install:claude' { Install-ClaudePlugin }
-            'update:codex' { Update-CodexPlugin }
-            'update:claude' { Update-ClaudePlugin }
+            'install:codex' { Install-CodexPlugin; Invoke-McpCli -McpArgs @('install', '--host', 'codex') }
+            'install:claude' { Install-ClaudePlugin; Invoke-McpCli -McpArgs @('install', '--host', 'claude') }
+            { $_ -in @('install:cursor', 'update:cursor') } { Invoke-McpCli -McpArgs @('install', '--host', 'cursor'); Add-RecordedHost cursor }
+            'update:codex' { Update-CodexPlugin; Invoke-McpCli -McpArgs @('install', '--host', 'codex') }
+            'update:claude' { Update-ClaudePlugin; Invoke-McpCli -McpArgs @('install', '--host', 'claude') }
         }
     }
 }

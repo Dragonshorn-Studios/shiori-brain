@@ -1,0 +1,204 @@
+{
+  "documents": [
+    {
+      "id": "beRj-vMOMy",
+      "summary": "Shared baseline for coding agents working in Dragonshorn Studios repositories.",
+      "tags": [],
+      "title": "Agent Engineering Contract",
+      "url": "raw/agent-engineering-contract.md"
+    },
+    {
+      "id": "fUd-TIUbub",
+      "summary": "You are the general reviewer and final correctness gate. Focus on defects introduced by the current change. Repository-local instructions, acceptance…",
+      "tags": [
+        "agent"
+      ],
+      "title": "Code Reviewer",
+      "url": "raw/code-reviewer.md"
+    },
+    {
+      "id": "zqpMdeH5OL",
+      "summary": "You are a conservative implementation agent. Improve the changed code without redesigning the product or hiding behavior behind unnecessary abstraction.",
+      "tags": [
+        "agent"
+      ],
+      "title": "Code Simplifier",
+      "url": "raw/code-simplifier.md"
+    },
+    {
+      "id": "xCzfG2K9la",
+      "summary": "You are a specialist reviewer for comments and documentation in a code change. Review the current diff, not the whole repository unless surrounding code is…",
+      "tags": [
+        "agent"
+      ],
+      "title": "Comment Analyzer",
+      "url": "raw/comment-analyzer.md"
+    },
+    {
+      "id": "5m9JCEM8kW",
+      "summary": "Shared guidance derived from Alyssa, Yukariko and related Dragonshorn Go repositories.",
+      "tags": [],
+      "title": "Go Services & CLIs",
+      "url": "raw/go-services-clis.md"
+    },
+    {
+      "id": "D0XZ3Q7LJQ",
+      "summary": "Shared guidance derived from Rika, Yomiko and related Dragonshorn Laravel applications.",
+      "tags": [],
+      "title": "Laravel & PHP Applications",
+      "url": "raw/laravel-php-applications.md"
+    },
+    {
+      "id": "j4IXQ9l6wz",
+      "summary": "This is the publication root for Dragonshorn Studios' shared coding-agent brain.",
+      "tags": [],
+      "title": "Shared Architecture — Start Here",
+      "url": "raw/overview.md"
+    },
+    {
+      "id": "5y2cid6W7c",
+      "summary": "You are a test-review specialist. Evaluate whether the changed behavior is protected by focused, meaningful tests and whether the tests would fail for the bug…",
+      "tags": [
+        "agent"
+      ],
+      "title": "PR Test Analyzer",
+      "url": "raw/pr-test-analyzer.md"
+    },
+    {
+      "id": "u9ydl457Du",
+      "summary": "Shared guidance derived from Belldandy and related Dragonshorn Python services.",
+      "tags": [],
+      "title": "Python Services & MCP Apps",
+      "url": "raw/python-services-mcp-apps.md"
+    },
+    {
+      "id": "qwe7oRtmJp",
+      "summary": "Cross-project rules for agents, automation, CI workers and MCP applications.",
+      "tags": [],
+      "title": "Security, Trust Boundaries & Human Approval",
+      "url": "raw/security-trust-boundaries-human-approval.md"
+    },
+    {
+      "id": "s-yBwYR5WE",
+      "summary": "You are an error-path reviewer. Trace how failures cross every changed boundary and ensure the system fails visibly, safely, and with enough context to recover.",
+      "tags": [
+        "agent"
+      ],
+      "title": "Silent Failure Hunter",
+      "url": "raw/silent-failure-hunter.md"
+    },
+    {
+      "id": "jB0f1VJ1LX",
+      "summary": "The design is the spec. Your job is to reproduce its structure, character and states in maintainable code, and prove it with screenshots. First extract the…",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Build UI from a Design",
+      "url": "raw/skill-build-ui-from-a-design.md"
+    },
+    {
+      "id": "z7IgB0vfO1",
+      "summary": "Use the generated review agents as independent specialists. Select only roles justified by the diff, keep every finding tied to evidence, and aggregate the…",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Comprehensive PR Review",
+      "url": "raw/skill-comprehensive-pr-review.md"
+    },
+    {
+      "id": "s0M7dJU7NQ",
+      "summary": "Companion to Skill — Build UI from a Design). The core rules there still apply; this page covers CSS-variable wiring.",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Design Tokens: Plain CSS",
+      "url": "raw/skill-design-tokens-plain-css.md"
+    },
+    {
+      "id": "FeCIngmaI-",
+      "summary": "Companion to Skill — Build UI from a Design). The core rules there still apply; this page only covers Tailwind wiring.",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Design Tokens: Tailwind",
+      "url": "raw/skill-design-tokens-tailwind.md"
+    },
+    {
+      "id": "pULFwF62YI",
+      "summary": "The canonical source is Dragonshorn-Studios/shiori-brain. AFFiNE owns the content; Shiori publishes the generated skills and marketplaces. Do not install from…",
+      "tags": [],
+      "title": "Skill Installation Guide",
+      "url": "raw/skill-installation-guide.md"
+    },
+    {
+      "id": "cPnAwyN3xu",
+      "summary": "You received a FigCraft design to implement, usually as a view-only link. Your job here is to extract everything the build needs, accurately, without changing…",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Read a FigCraft Design (View-Only)",
+      "url": "raw/skill-read-a-figcraft-design-view-only.md"
+    },
+    {
+      "id": "zUln8DRF4P",
+      "summary": "Work through a list of issues as a stack of dependent PRs, one PR per issue, in order. This is a strict protocol — follow the phases exactly, respect every…",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Stacked PR Workflow",
+      "url": "raw/skill-stacked-pr-workflow.md"
+    },
+    {
+      "id": "y0Fk7N54pG",
+      "summary": "Companion to Skill — Build UI from a Design). The core rules there still apply.",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — UI in Flutter",
+      "url": "raw/skill-ui-in-flutter.md"
+    },
+    {
+      "id": "byNKyHlhlD",
+      "summary": "Companion to Skill — Build UI from a Design). Styling is not decided here: use Skill — Design Tokens: Tailwind) if the repository uses Tailwind, else Skill —…",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — UI in React + TypeScript",
+      "url": "raw/skill-ui-in-react-typescript.md"
+    },
+    {
+      "id": "UpAosbdfHO",
+      "summary": "Companion to Skill — Build UI from a Design). It is the web implementation of its visual QA loop and accessibility checks.",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Web UI Checks (Playwright + axe)",
+      "url": "raw/skill-web-ui-checks-playwright-axe.md"
+    },
+    {
+      "id": "0-2oPGQCfe",
+      "summary": "A shared delivery loop for Dragonshorn Studios repositories.",
+      "tags": [],
+      "title": "Testing, Review & Delivery",
+      "url": "raw/testing-review-delivery.md"
+    },
+    {
+      "id": "AraMS7nUQo",
+      "summary": "You are a type and invariant reviewer. Judge types by the guarantees they provide to callers and maintainers, not by cleverness or maximum abstraction.",
+      "tags": [
+        "agent"
+      ],
+      "title": "Type Design Analyzer",
+      "url": "raw/type-design-analyzer.md"
+    },
+    {
+      "id": "GjUoG9ePZ5",
+      "summary": "Shared guidance derived from Maomao, Shiori, Eru, Lain and related TypeScript/Node projects.",
+      "tags": [],
+      "title": "TypeScript Services & Automation",
+      "url": "raw/typescript-services-automation.md"
+    }
+  ],
+  "generator": "shiori",
+  "schemaVersion": 1
+}

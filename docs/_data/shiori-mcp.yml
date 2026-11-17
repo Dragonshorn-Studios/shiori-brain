@@ -1,0 +1,48 @@
+- name: "shiori-brain"
+  command: "node ~/.local/share/shiori/shiori-brain/packages/shiori-brain-mcp/src/index.js"
+  summary: "Search and read the published Shiori knowledge archive"
+  when_installed: false
+- name: "figcraft"
+  command: "figcraft-cli mcp"
+  summary: "Interface design (FigCraft)"
+  when_installed: true
+- name: "cadcraft"
+  command: "cadcraft-cli mcp"
+  summary: "CAD and drafting (CadCraft)"
+  when_installed: true
+- name: "deckcraft"
+  command: "deckcraft-cli mcp"
+  summary: "Slide decks (DeckCraft)"
+  when_installed: true
+- name: "gridcraft"
+  command: "gridcraft-cli mcp"
+  summary: "Spreadsheets and tables (GridCraft)"
+  when_installed: true
+- name: "lightcraft"
+  command: "lightcraft-cli mcp"
+  summary: "Photo library and RAW development (LightCraft)"
+  when_installed: true
+- name: "pdfcraft"
+  command: "pdfcraft-cli mcp"
+  summary: "PDF documents (PdfCraft)"
+  when_installed: true
+- name: "photocraft"
+  command: "photocraft-cli mcp"
+  summary: "Image editor (PhotoCraft)"
+  when_installed: true
+- name: "wordcraft"
+  command: "wordcraft-cli mcp"
+  summary: "Word processing (WordCraft)"
+  when_installed: true
+- name: "effectcraft"
+  command: "effectcraft-cli mcp"
+  summary: "Motion graphics and VFX (EffectCraft)"
+  when_installed: true
+- name: "anicraft"
+  command: "anicraft-cli mcp"
+  summary: "2D vector animation (AniCraft)"
+  when_installed: true
+- name: "soundcraft"
+  command: "soundcraft-cli mcp"
+  summary: "Digital audio workstation (SoundCraft)"
+  when_installed: true
