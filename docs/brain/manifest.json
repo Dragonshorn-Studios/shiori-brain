@@ -64,8 +64,8 @@
       "agent": false,
       "id": "j4IXQ9l6wz",
       "path": "overview.md",
-      "revision": "40e7f126acb1239b495e6b96c60a1fb3192941d1e500819935d12898e02d2e46",
-      "sha256": "53743c7394d7ad87ed6e2a41d4245921fd08b3ab3a39943e5a132b2060e271f9",
+      "revision": "1a545c84ae7aba4fb9f7008d90a248ead4b6528ad3d217dd7ac6362e879b574b",
+      "sha256": "4495e1d5d9c00604b88a6d41e56ad28e7928c2b7c823d42ea0292f2d467a1bed",
       "skill": false,
       "title": "Shared Architecture — Start Here",
       "updatedAt": null
@@ -108,6 +108,16 @@
       "sha256": "88d8d6035089a336d6972851c3f223d7861e4e37d8350e4a0da4716a7bd89deb",
       "skill": true,
       "title": "silent-failure-hunter",
+      "updatedAt": null
+    },
+    {
+      "agent": false,
+      "id": "K_U9u5tVOS",
+      "path": "skill-apply-maomao-review.md",
+      "revision": "f97d9f3e1ad67e35fd751a6721cdda9ee7fe9f1f46c49bf5fcffcc490a2cd128",
+      "sha256": "bcf0837ed0a8b9e495f3db206b6a244d800e7d15d43891415ae0ac3ed3d5fbbe",
+      "skill": true,
+      "title": "Skill — Apply Maomao Review",
       "updatedAt": null
     },
     {

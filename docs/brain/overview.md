@@ -24,6 +24,7 @@ AFFiNE is the source of truth. Shiori exports only this document and same-worksp
 ## Migrated workflow skills
 - [Skill — Stacked PR Workflow](skill-stacked-pr-workflow.md))
 - [Skill — Comprehensive PR Review](skill-comprehensive-pr-review.md))
+- [Skill — Apply Maomao Review](skill-apply-maomao-review.md))
 
 ## Design-to-code skills
 - [Skill — Read a FigCraft Design (View-Only)](skill-read-a-figcraft-design-view-only.md))

@@ -21,6 +21,7 @@ Start with [Shared Architecture — Start Here](overview.md).
   - [Python Services & MCP Apps](python-services-mcp-apps.md)
   - [Skill — Stacked PR Workflow](skill-stacked-pr-workflow.md)
   - [Skill — Comprehensive PR Review](skill-comprehensive-pr-review.md)
+  - [Skill — Apply Maomao Review](skill-apply-maomao-review.md)
   - [Skill — Read a FigCraft Design (View-Only)](skill-read-a-figcraft-design-view-only.md)
   - [Skill — Build UI from a Design](skill-build-ui-from-a-design.md)
   - [Skill — Design Tokens: Tailwind](skill-design-tokens-tailwind.md)
