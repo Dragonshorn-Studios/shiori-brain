@@ -88,6 +88,15 @@
       "url": "raw/silent-failure-hunter.md"
     },
     {
+      "id": "K_U9u5tVOS",
+      "summary": "Work through unresolved review threads from **maomao** (the team's bot reviewer) on one pull request. Follow the loop exactly. Do not treat human review…",
+      "tags": [
+        "skill"
+      ],
+      "title": "Skill — Apply Maomao Review",
+      "url": "raw/skill-apply-maomao-review.md"
+    },
+    {
       "id": "jB0f1VJ1LX",
       "summary": "The design is the spec. Your job is to reproduce its structure, character and states in maintainable code, and prove it with screenshots. First extract the…",
       "tags": [
