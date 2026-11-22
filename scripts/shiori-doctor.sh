@@ -8,8 +8,16 @@ guide_url="https://github.com/$repository/blob/main/AGENT-SETUP.md"
 checkout="${SHIORI_CHECKOUT:-$HOME/.local/share/shiori/shiori-brain}"
 state_root="${SHIORI_STATE_HOME:-$HOME/.local/state/shiori}"
 skills_root="${SHIORI_SKILLS_HOME:-$HOME/.agents/skills}"
+claude_skills_root="${SHIORI_CLAUDE_SKILLS_HOME:-$HOME/.claude/skills}"
 installed_hosts_file="$state_root/installed-hosts"
 managed_skills_file="$state_root/managed-skills"
+managed_claude_skills_file="$state_root/managed-claude-skills"
+skill_link_temp_prefix='.shiori-link-'
+checkout_changed='false'
+skills_changed='false'
+checkout_line=''
+verbose='false'
+help='false'
 mcp_helper_tmp=''
 mcp_helper_dir=''
 if [ -d '.agents/skills' ] && [ -d 'plugins/shiori' ]; then
@@ -77,12 +85,16 @@ is_allowed_archive_url() {
   return 1
 }
 run_mcp_cli() {
-  has_command node || { printf '%s\n' 'Skipping MCP config: node is not available.'; return 0; }
+  has_command node || { printf '%s\n' 'Skipping MCP config: node is not available.' >&2; return 0; }
   helper=$(resolve_mcp_helper) || return 1
   pages_origin=$(archive_url) || pages_origin=''
   [ -n "$pages_origin" ] || { printf '%s\n' 'Set SHIORI_BRAIN_BASE_URL to the published Pages origin before installing MCP servers. The installer will not fall back to another project archive.' >&2; return 1; }
   is_allowed_archive_url "$pages_origin" || { printf '%s\n' 'SHIORI_BRAIN_BASE_URL must be an https URL (http is allowed only for localhost).' >&2; return 1; }
-  node "$helper" "$@" --home "$HOME" --checkout "$checkout" --base-url "$pages_origin"
+  if [ "$verbose" = true ]; then
+    node "$helper" "$@" --home "$HOME" --checkout "$checkout" --base-url "$pages_origin"
+  else
+    node "$helper" "$@" --home "$HOME" --checkout "$checkout" --base-url "$pages_origin" >/dev/null
+  fi
 }
 contains_text() {
   case $1 in
@@ -90,15 +102,26 @@ contains_text() {
     *) return 1 ;;
   esac
 }
+normalize_host() {
+  case $1 in
+    claude-code) printf '%s\n' 'claude' ;;
+    glm-acp) printf '%s\n' 'glm' ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
 host_detected() {
   case $1 in
     opencode) has_command opencode || has_home '.config/opencode' ;;
-    mcode) has_command mcode || has_home '.minimax' ;;
-    vibe) has_command vibe || has_home '.vibe' ;;
     codex) has_command codex || has_home '.codex' ;;
     claude|claude-code) has_command claude || has_home '.claude' ;;
+    glm|glm-acp) has_command glm-acp-agent || has_home '.local/share/zed/external_agents/registry/npx/glm-acp-agent/node_modules/.bin/glm-acp-agent' || [ -f "$HOME/.local/share/zed/external_agents/registry/npx/glm-acp-agent/node_modules/.bin/glm-acp-agent" ] ;;
+    zcode) has_command zcode || has_home '.zcode' ;;
     cursor) has_command cursor || has_home '.cursor' ;;
+    mcode) has_command mcode || has_home '.minimax' ;;
+    windsurf) has_command windsurf || has_home '.windsurf' ;;
+    vibe) has_command vibe || has_home '.vibe' ;;
     devin) has_command devin || has_home '.config/devin' || has_home '.devin' ;;
+    zed) has_command zed || has_home '.config/zed' || has_home '.local/share/zed' ;;
     *) return 1 ;;
   esac
 }
@@ -114,6 +137,49 @@ host_is_recorded() {
   while IFS= read -r recorded_host; do [ "$recorded_host" = "$1" ] && return 0; done < "$installed_hosts_file"
   return 1
 }
+assert_home() {
+  [ -n "${HOME:-}" ] || { printf '%s\n' 'HOME is empty or missing.' >&2; return 1; }
+}
+phys_home() {
+  CDPATH= cd -P "$HOME" 2>/dev/null && pwd
+}
+is_our_skill_link() {
+  [ -L "$1" ] && [ "$(readlink "$1")" = "$2" ]
+}
+assert_skills_dest() {
+  dest=$1
+  assert_home || return 1
+  home_phys=$(phys_home) || { printf '%s\n' 'HOME is empty or missing.' >&2; return 1; }
+  case $dest in
+    "$HOME"|"$HOME"/*|"$home_phys"|"$home_phys"/*) ;;
+    *) printf 'Refusing to write skills outside HOME: %s\n' "$dest" >&2; return 1 ;;
+  esac
+  existing=$dest
+  while [ ! -e "$existing" ] && [ ! -L "$existing" ]; do
+    parent=$(dirname "$existing")
+    [ "$parent" = "$existing" ] && break
+    existing=$parent
+  done
+  if [ -L "$existing" ] || [ -d "$existing" ]; then
+    dest_phys=$(CDPATH= cd -P "$existing" 2>/dev/null && pwd) || {
+      printf 'Refusing skills directory symlink that leaves HOME: %s\n' "$dest" >&2
+      return 1
+    }
+    case $dest_phys in
+      "$home_phys"|"$home_phys"/*) ;;
+      *) printf 'Refusing skills directory symlink that leaves HOME: %s\n' "$dest" >&2; return 1 ;;
+    esac
+  fi
+}
+cleanup_skill_temps() {
+  dest=$1
+  [ -d "$dest" ] || return 0
+  for leftover in "$dest"/$skill_link_temp_prefix*; do
+    if [ -L "$leftover" ] || [ -e "$leftover" ]; then
+      rm -f "$leftover"
+    fi
+  done
+}
 ensure_checkout() {
   has_command git || { printf '%s\n' 'Cannot install shared skills: git is not available.' >&2; return 1; }
   if [ -d "$checkout/.git" ]; then
@@ -123,93 +189,240 @@ ensure_checkout() {
       *) printf 'Refusing to update checkout with unexpected origin: %s\n' "$checkout_origin" >&2; return 1 ;;
     esac
     [ -z "$(git -C "$checkout" status --porcelain)" ] || { printf 'Refusing to update dirty checkout: %s\n' "$checkout" >&2; return 1; }
-    git -C "$checkout" pull --ff-only origin main
+    before=$(git -C "$checkout" rev-parse HEAD)
+    if [ "$verbose" = true ]; then
+      git -C "$checkout" pull --ff-only origin main
+    else
+      git -C "$checkout" pull -q --ff-only origin main
+    fi
+    after=$(git -C "$checkout" rev-parse HEAD)
+    if [ "$before" = "$after" ]; then
+      checkout_line="checkout: already up to date $after"
+    else
+      checkout_changed='true'
+      checkout_line="checkout: fast-forwarded $after"
+    fi
   elif [ -e "$checkout" ] || [ -L "$checkout" ]; then
     printf 'Refusing to replace non-checkout path: %s\n' "$checkout" >&2
     return 1
   else
     mkdir -p "${checkout%/*}"
-    git clone --filter=blob:none --branch main "https://github.com/$repository.git" "$checkout"
+    if [ "$verbose" = true ]; then
+      git clone --filter=blob:none --branch main "https://github.com/$repository.git" "$checkout"
+    else
+      git clone -q --filter=blob:none --branch main "https://github.com/$repository.git" "$checkout"
+    fi
+    checkout_changed='true'
+    after=$(git -C "$checkout" rev-parse HEAD)
+    checkout_line="checkout: cloned $after"
   fi
 }
-sync_shared_skills() {
+sync_skills_dest() {
+  dest_root=$1
+  managed_file=$2
   [ -d "$checkout/skills" ] || { printf 'Checkout has no skills directory: %s\n' "$checkout" >&2; return 1; }
   has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot link skills: ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
-  mkdir -p "$skills_root" "$state_root"
-  for source_skill in "$checkout/skills"/*; do
-    [ -d "$source_skill" ] || continue
-    skill_name=${source_skill##*/}
-    target_skill="$skills_root/$skill_name"
-    if [ -e "$target_skill" ] || [ -L "$target_skill" ]; then
-      [ -L "$target_skill" ] && [ "$(readlink "$target_skill")" = "$source_skill" ] || { printf 'Skill destination already belongs to something else: %s\n' "$target_skill" >&2; return 1; }
-    fi
-  done
-  if [ -f "$managed_skills_file" ]; then
+  assert_skills_dest "$dest_root" || return 1
+  mkdir -p "$state_root"
+  if [ ! -e "$dest_root" ] && [ ! -L "$dest_root" ]; then
+    mkdir -p "$dest_root"
+  fi
+  assert_skills_dest "$dest_root" || return 1
+  cleanup_skill_temps "$dest_root"
+  if [ -f "$managed_file" ]; then
     while IFS= read -r old_skill; do
       [ -n "$old_skill" ] || continue
-      old_target="$skills_root/$old_skill"
-      if [ ! -d "$checkout/skills/$old_skill" ] && [ -L "$old_target" ] && [ "$(readlink "$old_target")" = "$checkout/skills/$old_skill" ]; then
+      old_target="$dest_root/$old_skill"
+      old_source="$checkout/skills/$old_skill"
+      if [ ! -d "$old_source" ] && is_our_skill_link "$old_target" "$old_source"; then
         rm "$old_target"
+        skills_changed='true'
       fi
-    done < "$managed_skills_file"
+    done < "$managed_file"
   fi
-  next_managed="$managed_skills_file.next"
+  next_managed="$managed_file.next"
   : > "$next_managed"
   for source_skill in "$checkout/skills"/*; do
     [ -d "$source_skill" ] || continue
     skill_name=${source_skill##*/}
-    target_skill="$skills_root/$skill_name"
-    if [ ! -L "$target_skill" ]; then ln -s "$source_skill" "$target_skill"; fi
+    target_skill="$dest_root/$skill_name"
+    if [ -L "$target_skill" ] || [ -e "$target_skill" ]; then
+      if is_our_skill_link "$target_skill" "$source_skill"; then
+        printf '%s\n' "$skill_name" >> "$next_managed"
+        continue
+      fi
+      printf 'Warning: skipping skill %s; %s already belongs to something else.\n' "$skill_name" "$target_skill" >&2
+      continue
+    fi
+    tmp_skill="$dest_root/$skill_link_temp_prefix$skill_name.$$"
+    ln -s "$source_skill" "$tmp_skill"
+    mv "$tmp_skill" "$target_skill"
     printf '%s\n' "$skill_name" >> "$next_managed"
+    skills_changed='true'
   done
-  mv "$next_managed" "$managed_skills_file"
-  printf 'Shared Shiori skills linked from %s into %s.\n' "$checkout" "$skills_root"
-}
-install_codex() {
-  has_command codex || { printf '%s\n' 'Cannot install Codex plugin: codex CLI is not available.' >&2; return 1; }
-  codex plugin marketplace add --help >/dev/null 2>&1 && codex plugin add --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot install Codex plugin: this CLI build or account does not expose plugin installation.' >&2; return 1; }
-  codex_marketplaces=$(codex plugin marketplace list --json)
-  if contains_text "$codex_marketplaces" "$marketplace"; then
-    printf 'Codex marketplace %s is already configured.\n' "$marketplace"
+  if [ -f "$managed_file" ] && [ "$(cat "$next_managed")" = "$(cat "$managed_file")" ]; then
+    rm -f "$next_managed"
   else
-    codex plugin marketplace add "$repository" --ref main --json
+    mv "$next_managed" "$managed_file"
+    skills_changed='true'
   fi
-  codex_plugins=$(codex plugin list --json)
-  if contains_text "$codex_plugins" "shiori@$marketplace"; then
-    printf 'Codex plugin shiori@%s is already installed.\n' "$marketplace"
-  else
-    codex plugin add "shiori@$marketplace" --json
+  if [ "$verbose" = true ]; then
+    printf 'Shared Shiori skills linked from %s into %s.\n' "$checkout" "$dest_root"
   fi
-  record_host codex
 }
-install_claude() {
-  has_command claude || { printf '%s\n' 'Cannot install Claude plugin: claude CLI is not available.' >&2; return 1; }
-  claude plugin marketplace add --help >/dev/null 2>&1 && claude plugin install --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot install Claude plugin: this CLI build or account does not expose plugin installation.' >&2; return 1; }
-  claude_marketplaces=$(claude plugin marketplace list --json)
-  if contains_text "$claude_marketplaces" "$marketplace"; then
-    printf 'Claude marketplace %s is already configured.\n' "$marketplace"
-  else
-    claude plugin marketplace add "$repository"
-  fi
-  claude_plugins=$(claude plugin list --json)
-  if contains_text "$claude_plugins" "shiori@$marketplace"; then
-    printf 'Claude plugin shiori@%s is already installed.\n' "$marketplace"
-  else
-    claude plugin install --scope user --yes "shiori@$marketplace"
-  fi
-  record_host claude
+sync_shared_skills() {
+  sync_skills_dest "$skills_root" "$managed_skills_file"
 }
-update_codex() {
-  codex plugin marketplace upgrade "$marketplace"
-  record_host codex
+sync_claude_skills() {
+  sync_skills_dest "$claude_skills_root" "$managed_claude_skills_file"
 }
-update_claude() {
-  claude plugin marketplace update "$marketplace"
-  claude plugin update "shiori@$marketplace"
-  record_host claude
+warn_legacy_codex_plugin() {
+  config_file="$HOME/.codex/config.toml"
+  [ -f "$config_file" ] || return 0
+  if contains_text "$(cat "$config_file" 2>/dev/null)" "plugins.\"shiori@$marketplace\""; then
+    printf 'Warning: Codex plugin shiori@%s duplicates skills now synced to ~/.agents/skills. Remove it with: codex plugin remove shiori@%s\n' "$marketplace" "$marketplace" >&2
+  fi
+}
+warn_legacy_claude_plugin() {
+  config_file="$HOME/.claude/plugins/installed_plugins.json"
+  [ -f "$config_file" ] || return 0
+  if contains_text "$(cat "$config_file" 2>/dev/null)" "shiori@$marketplace"; then
+    printf 'Warning: Claude plugin shiori@%s duplicates skills now synced to ~/.claude/skills. Remove it with: claude plugin uninstall shiori@%s --scope user\n' "$marketplace" "$marketplace" >&2
+  fi
+}
+comma_hosts() {
+  first=true
+  for item; do
+    if [ "$first" = true ]; then
+      printf '%s' "$item"
+      first=false
+    else
+      printf ', %s' "$item"
+    fi
+  done
+}
+print_host_list() {
+  prefix=$1
+  shift
+  if [ "$#" -eq 0 ]; then
+    printf '%s: none\n' "$prefix"
+  else
+    printf '%s: %s\n' "$prefix" "$(comma_hosts "$@")"
+  fi
+}
+list_detected_hosts() {
+  detected_list=''
+  not_detected=''
+  if host_detected opencode; then detected_list="$detected_list opencode"; else not_detected="$not_detected opencode"; fi
+  if host_detected mcode; then detected_list="$detected_list mcode"; else not_detected="$not_detected mcode"; fi
+  if host_detected vibe; then detected_list="$detected_list vibe"; else not_detected="$not_detected vibe"; fi
+  if host_detected codex; then detected_list="$detected_list codex"; else not_detected="$not_detected codex"; fi
+  if host_detected claude; then detected_list="$detected_list claude"; else not_detected="$not_detected claude"; fi
+  if host_detected cursor; then detected_list="$detected_list cursor"; else not_detected="$not_detected cursor"; fi
+  if host_detected devin; then detected_list="$detected_list devin"; else not_detected="$not_detected devin"; fi
+  if host_detected zed; then detected_list="$detected_list zed"; else not_detected="$not_detected zed"; fi
+  if host_detected glm; then detected_list="$detected_list glm"; else not_detected="$not_detected glm"; fi
+  if host_detected zcode; then detected_list="$detected_list zcode"; else not_detected="$not_detected zcode"; fi
+  if host_detected windsurf; then detected_list="$detected_list windsurf"; else not_detected="$not_detected windsurf"; fi
+  detected_list=${detected_list# }
+  not_detected=${not_detected# }
+}
+print_quiet_destinations() {
+  agents_hosts=''
+  claude_hosts=''
+  for selected_target in $selected_targets; do
+    case $selected_target in
+      opencode|codex|cursor|mcode|vibe|devin|zed) agents_hosts="$agents_hosts $selected_target" ;;
+      claude|claude-code|glm|glm-acp) claude_hosts="$claude_hosts $selected_target" ;;
+    esac
+  done
+  agents_hosts=${agents_hosts# }
+  claude_hosts=${claude_hosts# }
+  [ -z "$agents_hosts" ] || printf '%s: skills -> ~/.agents/skills\n' "$(comma_hosts $agents_hosts)"
+  [ -z "$claude_hosts" ] || printf '%s: skills -> ~/.claude/skills\n' "$(comma_hosts $claude_hosts)"
+  for selected_target in $selected_targets; do
+    case $selected_target in
+      opencode) printf 'opencode: MCP -> ~/.config/opencode/opencode.jsonc\n' ;;
+      codex) printf 'codex: MCP -> ~/.codex/config.toml\n' ;;
+      claude|claude-code) printf 'claude: MCP -> ~/.claude.json\n' ;;
+      cursor) printf 'cursor: MCP -> ~/.cursor/mcp.json\n' ;;
+      devin) printf 'devin: MCP -> ~/.config/devin/mcp_config.json\n' ;;
+    esac
+  done
+}
+print_quiet_report() {
+  if [ -z "$checkout_line" ] && [ -d "$checkout/.git" ]; then
+    checkout_line="checkout: already up to date $(git -C "$checkout" rev-parse HEAD)"
+  fi
+  [ -z "$checkout_line" ] || printf '%s\n' "$checkout_line"
+  list_detected_hosts
+  print_host_list detected $detected_list
+  print_quiet_destinations
+  if [ "$install_failed" = true ] && [ "$checkout_changed" = false ] && [ "$skills_changed" = false ]; then
+    printf 'skipped\n'
+  elif [ "$checkout_changed" = false ] && [ "$skills_changed" = false ]; then
+    printf 'already current\n'
+  else
+    printf 'updated\n'
+  fi
+}
+print_usage() {
+  printf '%s\n' \
+    '' \
+    'How --install and --update work' \
+    '  --install [hosts]  set up the named hosts, or every locally detected host if none are named. Valid names: opencode, mcode, vibe, codex, claude, cursor, devin, zed, glm.' \
+    '  --update [hosts]   re-run the installer for the named hosts, or every currently detected host if none are named.' \
+    '                     Recorded-but-missing hosts are not required. Capabilities added by a newer doctor are applied on update.' \
+    '  --verbose          print the status table, recipes, git, and MCP lines.' \
+    '  --help             print this usage text.' \
+    '  Host names may be space- or comma-separated; SHIORI_INSTALL / SHIORI_UPDATE / SHIORI_VERBOSE are the pipe equivalents.' \
+    '  Pipe (every detected host first; a bare curl | sh stays read-only):' \
+    '    curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_INSTALL=all sh' \
+    '    $env:SHIORI_INSTALL='\''all'\''; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex' \
+    '    curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_UPDATE=all sh' \
+    '    $env:SHIORI_UPDATE='\''all'\''; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex' \
+    '  Named hosts: SHIORI_INSTALL='\''codex,claude,cursor'\'' (or SHIORI_UPDATE).' \
+    '' \
+    'Recommended native setup' \
+    '  OpenCode: --install opencode links skills through ~/.agents/skills and writes MCP config.' \
+    '  Codex:    --install codex links skills through ~/.agents/skills and writes MCP config. Plugin marketplace is a separate ChatGPT web channel.' \
+    '  Claude:   --install claude links skills through ~/.claude/skills and writes MCP config. Plugin marketplace is a separate channel.' \
+    '  glm:      --install glm links skills through ~/.claude/skills when glm-acp-agent is present as a file.' \
+    '  Cursor:   --install cursor writes MCP config and links skills through ~/.agents/skills. It does not write ~/.cursor/skills.' \
+    '  MCode:    select --install mcode to use the same managed checkout and global Agent Skills links.' \
+    '  Vibe:     select --install vibe to use the same managed checkout and global Agent Skills links.' \
+    '  Devin:    --install devin writes user-scope MCP config and links skills through ~/.agents/skills.' \
+    '  Zed:      --install zed links skills through ~/.agents/skills.' \
+    '  ZCode:    Settings -> Plugins -> Create -> Add marketplace -> Dragonshorn-Studios/shiori-brain; install Shiori.' \
+    '' \
+    "Full instructions: $guide_url"
+}
+print_banner() {
+  printf 'Shiori agent doctor\nRepository: %s\nMode: %s (%s)\n\n' "$repository" "$context" "$project_hint"
+row 'OpenCode' opencode '.config/opencode' local opencode
+row 'Codex' codex '.codex' local codex
+row 'Claude Code' claude '.claude' local claude
+row 'glm-acp-agent' glm-acp-agent '.local/share/zed/external_agents/registry/npx/glm-acp-agent/node_modules/.bin/glm-acp-agent' local glm
+row 'ZCode' zcode '.zcode' local zcode
+row 'Cursor' cursor '.cursor' local cursor
+row 'MCode / MiniMax' mcode '.minimax' local mcode
+row 'Windsurf' windsurf '.windsurf' local windsurf
+row 'Vibe' vibe '.vibe' local vibe
+row 'Devin' devin '.config/devin' cloud devin
+row 'Zed' zed '.config/zed' local zed
+  printf '%s\n' '' 'MCP servers' '  Installed under --install / --update for cursor, devin, opencode, claude, and codex. A read-only run does not launch host CLIs.'
+  print_usage
 }
 operation=''
 selected_targets="${SHIORI_INSTALL:-}"
+case ${SHIORI_VERBOSE:-} in 1|true|all|yes) verbose='true' ;; esac
+while [ "$#" -gt 0 ]; do
+  case $1 in
+    --verbose) verbose='true'; shift ;;
+    --help) help='true'; shift ;;
+    *) break ;;
+  esac
+done
 [ -z "${SHIORI_UPDATE:-}" ] || { [ -z "$selected_targets" ] || { printf '%s\n' 'Choose either SHIORI_INSTALL or SHIORI_UPDATE.' >&2; exit 2; }; operation='update'; selected_targets="$SHIORI_UPDATE"; }
 [ -z "$selected_targets" ] || operation="${operation:-install}"
 if [ "$#" -gt 0 ]; then
@@ -222,45 +435,69 @@ if [ "$#" -gt 0 ]; then
   shift
   selected_targets="$*"
 fi
-if [ "$operation" = 'install' ] && [ -z "$selected_targets" ]; then
-  printf '%s\n' 'Pass at least one installer: opencode, mcode, vibe, codex, claude, cursor, or devin.' >&2
-  exit 2
-fi
-if [ "$operation" = 'update' ] && [ -z "$selected_targets" ]; then
-  [ -f "$installed_hosts_file" ] || { printf '%s\n' 'No recorded Shiori installations to update.' >&2; exit 2; }
-  while IFS= read -r recorded_host; do selected_targets="$selected_targets $recorded_host"; done < "$installed_hosts_file"
-  detected_hints=''
-  for candidate in opencode mcode vibe codex claude cursor devin; do
-    case " $selected_targets " in *" $candidate "*) continue ;; esac
-    host_is_recorded "$candidate" && continue
-    host_detected "$candidate" && detected_hints="$detected_hints $candidate"
-  done
-  [ -z "$detected_hints" ] || printf 'Detected locally but not recorded:%s - pass them to --install or --update to enable their features.\n' "$detected_hints"
+normalized_targets=''
+for selected_target in $selected_targets; do
+  [ -n "$selected_target" ] || continue
+  selected_target=$(normalize_host "$selected_target")
+  normalized_targets="$normalized_targets $selected_target"
+done
+selected_targets=${normalized_targets# }
+case $selected_targets in
+  all|1|true) selected_targets='' ;;
+esac
+select_detected_hosts() {
+  selected_targets=''
+    host_detected opencode && selected_targets="$selected_targets opencode"
+    host_detected mcode && selected_targets="$selected_targets mcode"
+    host_detected vibe && selected_targets="$selected_targets vibe"
+    host_detected codex && selected_targets="$selected_targets codex"
+    host_detected claude && selected_targets="$selected_targets claude"
+    host_detected cursor && selected_targets="$selected_targets cursor"
+    host_detected devin && selected_targets="$selected_targets devin"
+    host_detected zed && selected_targets="$selected_targets zed"
+    host_detected glm && selected_targets="$selected_targets glm"
+  selected_targets=${selected_targets# }
+}
+if [ -n "$operation" ] && [ -z "$selected_targets" ]; then
+  select_detected_hosts
+  if [ -z "$selected_targets" ]; then
+    printf '%s\n' 'No installable hosts detected. Pass a host name to --install / --update: opencode, mcode, vibe, codex, claude, cursor, devin, zed, or glm.' >&2
+    exit 2
+  fi
 fi
 assert_installer() {
   case $1 in
-    opencode|mcode|vibe)
+    opencode)
       has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
+      has_command node || { printf '%s\n' 'Cannot install OpenCode MCP: node is not available.' >&2; return 1; }
       ;;
     codex)
-      if [ "$operation" = update ]; then
-        has_command codex && codex plugin marketplace upgrade --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot update Codex plugin: this CLI build does not expose marketplace upgrades.' >&2; return 1; }
-      else
-        has_command codex && codex plugin marketplace add --help >/dev/null 2>&1 && codex plugin add --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot install Codex plugin: this CLI build or account does not expose plugin installation.' >&2; return 1; }
-      fi
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
+      has_command node || { printf '%s\n' 'Cannot install Codex MCP: node is not available.' >&2; return 1; }
       ;;
     claude|claude-code)
-      if [ "$operation" = update ]; then
-        has_command claude && claude plugin marketplace update --help >/dev/null 2>&1 && claude plugin update --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot update Claude plugin: this CLI build does not expose plugin updates.' >&2; return 1; }
-      else
-        has_command claude && claude plugin marketplace add --help >/dev/null 2>&1 && claude plugin install --help >/dev/null 2>&1 || { printf '%s\n' 'Cannot install Claude plugin: this CLI build or account does not expose plugin installation.' >&2; return 1; }
-      fi
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
+      has_command node || { printf '%s\n' 'Cannot install Claude Code MCP: node is not available.' >&2; return 1; }
+      ;;
+    glm|glm-acp)
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
       ;;
     cursor)
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
       has_command node || { printf '%s\n' 'Cannot install Cursor MCP: node is not available.' >&2; return 1; }
       ;;
+    mcode)
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
+      ;;
+    vibe)
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
+      ;;
     devin)
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
       has_command node || { printf '%s\n' 'Cannot install Devin MCP: node is not available.' >&2; return 1; }
+      ;;
+    zed)
+      has_command git && has_command ln && has_command readlink && has_command rm && has_command mkdir && has_command mv || { printf '%s\n' 'Cannot install shared skills: git, ln, readlink, rm, mkdir, and mv are required. On Windows use the PowerShell installer.' >&2; return 1; }
       ;;
     *) printf 'No command-line installer is available for: %s\n' "$1" >&2; return 1 ;;
   esac
@@ -282,17 +519,27 @@ row() {
   fi
 }
 
-shared_skills_installed() {
-  [ -d "$checkout/.git" ] && [ -s "$managed_skills_file" ] || return 1
+skills_dest_installed() {
+  dest_root=$1
+  managed_file=$2
+  [ -d "$checkout/.git" ] && [ -s "$managed_file" ] || return 1
   found_skill=false
   while IFS= read -r skill_name; do
     [ -n "$skill_name" ] || continue
     found_skill=true
-    target_skill="$skills_root/$skill_name"
+    target_skill="$dest_root/$skill_name"
     source_skill="$checkout/skills/$skill_name"
-    [ -L "$target_skill" ] && [ "$(readlink "$target_skill")" = "$source_skill" ] || return 1
-  done < "$managed_skills_file"
+    is_our_skill_link "$target_skill" "$source_skill" || return 1
+  done < "$managed_file"
   [ "$found_skill" = true ]
+}
+
+shared_skills_installed() {
+  skills_dest_installed "$skills_root" "$managed_skills_file"
+}
+
+claude_skills_installed() {
+  skills_dest_installed "$claude_skills_root" "$managed_claude_skills_file"
 }
 
 mcp_configured() {
@@ -314,18 +561,15 @@ mcp_configured() {
 shiori_status() {
   parts=''
   case $1 in
-    opencode|mcode|vibe)
+    opencode|codex|cursor|mcode|vibe|devin|zed)
       shared_skills_installed && parts='managed Agent Skills'
       ;;
-    codex)
-      host_is_recorded codex && parts='recorded native plugin'
-      ;;
-    claude)
-      host_is_recorded claude && parts='recorded native plugin'
+    claude|claude-code|glm|glm-acp)
+      claude_skills_installed && parts='managed Agent Skills'
       ;;
   esac
   case $1 in
-    opencode|cursor|devin|claude|codex)
+    opencode|codex|claude|claude-code|cursor|devin)
       mcp_configured "$1" && parts="${parts:+$parts + }MCP configured"
       ;;
   esac
@@ -334,59 +578,78 @@ shiori_status() {
     return
   fi
   case $1 in
-    opencode|mcode|vibe|cursor|devin) printf '%s' 'not installed' ;;
+    opencode|codex|claude|claude-code|glm|glm-acp|cursor|mcode|vibe|devin|zed) printf '%s' 'not installed' ;;
     *) printf '%s' 'unknown (no local status API)' ;;
   esac
 }
 
-printf 'Shiori agent doctor\nRepository: %s\nMode: %s (%s)\n\n' "$repository" "$context" "$project_hint"
-row 'OpenCode' opencode '.config/opencode' local opencode
-row 'Codex' codex '.codex' local codex
-row 'Claude Code' claude '.claude' local claude
-row 'ZCode' zcode '.zcode' local zcode
-row 'Cursor' cursor '.cursor' local cursor
-row 'MCode / MiniMax' mcode '.minimax' local mcode
-row 'Windsurf' windsurf '.windsurf' local windsurf
-row 'Vibe' vibe '.vibe' local vibe
-row 'Devin' devin '.config/devin' cloud devin
-
-printf '%s\n' '' 'MCP servers' '  Installed under --install / --update for cursor, devin, opencode, claude, and codex. A read-only run does not launch host CLIs.'
-
-printf '%s\n' \
-  '' \
-  'How --install and --update work' \
-  '  --install <hosts>  set up the named hosts now. Valid names: opencode, mcode, vibe, codex, claude, cursor, devin.' \
-  '  --update [hosts]   re-run the installer for every host recorded by an earlier --install, or only the named' \
-  '                     hosts. Capabilities added by a newer doctor (for example MCP config) are applied on update.' \
-  '  Host names may be space- or comma-separated; SHIORI_INSTALL / SHIORI_UPDATE are the pipe equivalents.' \
-  '' \
-  'Recommended native setup' \
-  '  OpenCode: --install opencode links skills through ~/.agents/skills and writes MCP config.' \
-  "  Codex:    codex plugin marketplace add $repository ; then open /plugins and install Shiori. --install codex also writes MCP config." \
-  "  Claude:   /plugin marketplace add $repository ; then /plugin install shiori@$marketplace. --install claude also writes MCP config." \
-  "  ZCode:    Settings -> Plugins -> Create -> Add marketplace -> $repository; install Shiori." \
-  "  Cursor:   Settings -> Plugins; add https://github.com/$repository; install Shiori. --install cursor writes MCP config." \
-  '  MCode:    select --install mcode to use the same managed checkout and global Agent Skills links.' \
-  '  Vibe:     select --install vibe to use the same managed checkout and global Agent Skills links.' \
-  '  Devin:    --install devin writes user-scope MCP config; the cloud workspace needs no local CLI.' \
-  '' \
-  "Full instructions: $guide_url"
+if [ "$help" = true ]; then
+  print_usage
+  exit 0
+fi
+if [ "$verbose" = true ]; then
+  print_banner
+fi
+if [ -z "$operation" ] && [ "$verbose" != true ]; then
+  list_detected_hosts
+  print_host_list detected $detected_list
+  print_host_list 'not detected' $not_detected
+fi
 
 if [ -n "$operation" ]; then
-  printf '%s\n' '' "Selected operation: $operation"
+  assert_home || exit 2
+  if [ "$verbose" = true ]; then
+    printf '%s\n' '' "Selected operation: $operation"
+  fi
   previous_ifs=$IFS
   IFS=', '
-  shared_skills_selected='false'
+  agents_skills_selected='false'
+  claude_skills_selected='false'
   mcp_selected='false'
+  warn_codex_plugin='false'
+  warn_claude_plugin='false'
+  install_failed='false'
+  usable_targets=''
   for selected_target in $selected_targets; do
-    assert_installer "$selected_target"
-    case $selected_target in opencode|mcode|vibe) shared_skills_selected='true' ;; esac
-    case $selected_target in cursor|claude|claude-code|codex|opencode|devin) mcp_selected='true' ;; esac
+    if assert_installer "$selected_target"; then
+      usable_targets="$usable_targets $selected_target"
+    else
+      printf 'Warning: cannot install %s; continuing with remaining hosts.\n' "$selected_target" >&2
+      install_failed='true'
+    fi
   done
-  if [ "$shared_skills_selected" = true ]; then
-    [ "$operation" != update ] || [ -d "$checkout/.git" ] || { printf 'No managed checkout exists to update: %s\n' "$checkout" >&2; exit 2; }
-    ensure_checkout
+  selected_targets=${usable_targets# }
+  if [ -z "$selected_targets" ]; then
+    printf '%s\n' 'No remaining hosts could be installed.' >&2
+    exit 1
+  fi
+  for selected_target in $selected_targets; do
+    case $selected_target in
+    opencode|codex|cursor|mcode|vibe|devin|zed) agents_skills_selected='true' ;;
+    claude|claude-code|glm|glm-acp) claude_skills_selected='true' ;;
+    esac
+    case $selected_target in
+    opencode|codex|claude|claude-code|cursor|devin) mcp_selected='true' ;;
+    esac
+    case $selected_target in
+      codex) warn_codex_plugin='true' ;;
+      claude|claude-code) warn_claude_plugin='true' ;;
+    esac
+  done
+  if [ "$agents_skills_selected" = true ] || [ "$claude_skills_selected" = true ] || [ "$mcp_selected" = true ]; then
+    [ "$operation" != update ] || [ -d "$checkout/.git" ] || [ "$mcp_selected" = true ] || { printf 'No managed checkout exists to update: %s\n' "$checkout" >&2; exit 2; }
+    if [ "$agents_skills_selected" = true ] || [ "$claude_skills_selected" = true ]; then
+      [ "$operation" != update ] || [ -d "$checkout/.git" ] || { printf 'No managed checkout exists to update: %s\n' "$checkout" >&2; exit 2; }
+      ensure_checkout
+    fi
+  fi
+  if [ "$agents_skills_selected" = true ]; then
     sync_shared_skills
+    [ "$warn_codex_plugin" = true ] && warn_legacy_codex_plugin
+  fi
+  if [ "$claude_skills_selected" = true ]; then
+    sync_claude_skills
+    [ "$warn_claude_plugin" = true ] && warn_legacy_claude_plugin
   fi
   if [ "$mcp_selected" = true ]; then
     mcp_script="$checkout/packages/shiori-brain-mcp/src/index.js"
@@ -397,14 +660,25 @@ if [ -n "$operation" ]; then
   for selected_target in $selected_targets; do
     case "$operation:$selected_target" in
       install:opencode|update:opencode) record_host opencode; run_mcp_cli install --host opencode ;;
-      install:mcode|install:vibe|update:mcode|update:vibe) record_host "$selected_target" ;;
-      install:codex) install_codex; run_mcp_cli install --host codex ;;
-      install:claude|install:claude-code) install_claude; run_mcp_cli install --host claude ;;
-      install:cursor|update:cursor) run_mcp_cli install --host cursor; record_host cursor ;;
-      install:devin|update:devin) run_mcp_cli install --host devin; record_host devin ;;
-      update:codex) update_codex; run_mcp_cli install --host codex ;;
-      update:claude|update:claude-code) update_claude; run_mcp_cli install --host claude ;;
+      install:codex|update:codex) record_host codex; run_mcp_cli install --host codex ;;
+      install:claude|update:claude|install:claude-code|update:claude-code) record_host claude; run_mcp_cli install --host claude ;;
+      install:glm|update:glm|install:glm-acp|update:glm-acp) record_host glm ;;
+      install:cursor|update:cursor) record_host cursor; run_mcp_cli install --host cursor ;;
+      install:mcode|update:mcode) record_host mcode ;;
+      install:vibe|update:vibe) record_host vibe ;;
+      install:devin|update:devin) record_host devin; run_mcp_cli install --host devin ;;
+      install:zed|update:zed) record_host zed ;;
     esac
   done
   IFS=$previous_ifs
+  if [ "$verbose" = true ]; then
+    if [ "$checkout_changed" = false ] && [ "$skills_changed" = false ]; then
+      printf 'already current\n'
+    fi
+  else
+    print_quiet_report
+  fi
+  if [ "$install_failed" = true ]; then
+    exit 1
+  fi
 fi
