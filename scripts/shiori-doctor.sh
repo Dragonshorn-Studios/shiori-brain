@@ -376,6 +376,7 @@ print_usage() {
     '  --verbose          print the status table, recipes, git, and MCP lines.' \
     '  --help             print this usage text.' \
     '  Host names may be space- or comma-separated; SHIORI_INSTALL / SHIORI_UPDATE / SHIORI_VERBOSE are the pipe equivalents.' \
+    '  MCP: Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs (WSL: /mnt/c). Windows and WSL use <name>-cli mcp --attach 7979.' \
     '  Pipe (every detected host first; a bare curl | sh stays read-only):' \
     '    curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_INSTALL=all sh' \
     '    $env:SHIORI_INSTALL='\''all'\''; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex' \
@@ -410,7 +411,7 @@ row 'Windsurf' windsurf '.windsurf' local windsurf
 row 'Vibe' vibe '.vibe' local vibe
 row 'Devin' devin '.config/devin' cloud devin
 row 'Zed' zed '.config/zed' local zed
-  printf '%s\n' '' 'MCP servers' '  Installed under --install / --update for cursor, devin, opencode, claude, and codex. A read-only run does not launch host CLIs.'
+  printf '%s\n' '' 'MCP servers' '  Installed under --install / --update for cursor, devin, opencode, claude, and codex. Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs (WSL: /mnt/c). Windows and WSL use <name>-cli mcp --attach 7979. A read-only run does not launch host CLIs.'
   print_usage
 }
 operation=''
