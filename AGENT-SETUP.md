@@ -20,60 +20,75 @@ sh scripts/shiori-doctor.sh
 .\scripts\shiori-doctor.ps1
 ```
 
-The doctor is read-only. It does not edit home-directory configuration or install plugins. When piped from GitHub it runs in remote mode and does not assume that this repository's project skill directories exist locally.
+The doctor is read-only. It does not edit home-directory configuration or install plugins. When piped from GitHub it runs in remote mode and does not assume that this repository's project skill directories exist locally. Default `--install` / `--update` output is a checkout line, the detected hosts, one line per destination, and a short summary. `--verbose` (or `SHIORI_VERBOSE=1`) restores the status table, recipes, git, and MCP lines. `--help` prints usage.
 
 ## Install from the command line
 
-Only explicitly selected hosts are changed. OpenCode, MCode, and Vibe share one managed checkout at `~/.local/share/shiori/shiori-brain`; its skills are linked individually into the standard global `~/.agents/skills` directory. Codex and Claude Code use their plugin CLIs when the installed client version and account rollout expose them. Cursor, Devin, OpenCode, Claude Code, and Codex also receive MCP config under `--install` / `--update`:
+`--install` or `--update` with no host names sets up every locally detected installable host. An explicit host list still takes precedence over detection. Hosts that already read `~/.agents/skills` with full skill functionality share one managed checkout at `~/.local/share/shiori/shiori-brain` and receive individual links in `~/.agents/skills/<name>`. Claude Code uses the same checkout linked into `~/.claude/skills/<name>`. Two hosts that share a destination never get two copies. The doctor does not install Codex or Claude plugins; those remain published in the repository marketplace as a separate channel (ChatGPT web and manual installs). Cursor, Devin, OpenCode, Claude Code, and Codex also receive MCP config under `--install` / `--update`. Devin is detected only when the `devin` CLI is on `PATH` or `~/.config/devin` / `~/.devin` exists; cloud-capable status alone is not enough. A bare `curl | sh` / `irm | iex` with no environment variable stays read-only.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --install opencode mcode vibe codex claude cursor devin
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_INSTALL=all sh
 ```
 
 ```powershell
-$env:SHIORI_INSTALL='opencode,mcode,vibe,codex,claude,cursor,devin'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+$env:SHIORI_INSTALL='all'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
-For a checked-out script, use `sh scripts/shiori-doctor.sh --install opencode mcode vibe` or `.\scripts\shiori-doctor.ps1 -Install opencode,mcode,vibe`. Re-running install fast-forwards the managed checkout and reconciles skill links. Existing non-Shiori skill destinations are never overwritten.
+Named hosts:
 
-Valid host names: `opencode`, `mcode`, `vibe`, `codex`, `claude` (or `claude-code`), `cursor`, and `devin`. What each one does:
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_INSTALL='codex,claude,cursor' sh
+```
+
+```powershell
+$env:SHIORI_INSTALL='codex,claude,cursor'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
+```
+
+For a checked-out script, use `sh scripts/shiori-doctor.sh --install` to set up every detected host, or `sh scripts/shiori-doctor.sh --install opencode mcode vibe` / `.\scripts\shiori-doctor.ps1 -Install opencode,mcode,vibe` to name hosts. Re-running install fast-forwards the managed checkout and reconciles skill links. Existing non-Shiori skill destinations are skipped with a warning and never overwritten. A host that is not detected is not created.
+
+Valid host names: `opencode`, `mcode`, `vibe`, `codex`, `claude`, `cursor`, `devin`, `zed`, and `glm` (`claude-code` is accepted as `claude`). What each one does:
 
 | Host | `--install` effect |
 | --- | --- |
-| opencode | Managed checkout + Agent Skills links + MCP config in `~/.config/opencode/opencode.jsonc` |
-| mcode, vibe | Managed checkout + Agent Skills links |
-| codex | Plugin marketplace + plugin + MCP via `codex mcp add` |
-| claude | Plugin marketplace + plugin + MCP via `claude mcp add -s user` |
-| cursor | MCP config in `~/.cursor/mcp.json` |
-| devin | MCP config in `~/.config/devin/mcp_config.json` |
+| opencode | Managed checkout + Agent Skills links in `~/.agents/skills` + MCP config in `~/.config/opencode/opencode.jsonc` |
+| codex | Managed checkout + Agent Skills links in `~/.agents/skills` + MCP via `codex mcp add`. Does not install the Codex plugin. |
+| claude | Managed checkout + Agent Skills links in `~/.claude/skills` + MCP via `claude mcp add -s user`. Does not install the Claude plugin. |
+| glm | Managed checkout + Agent Skills links in `~/.claude/skills` (shared with Claude Code). A Zed directory alone does not count as detection. |
+| cursor | Managed checkout + Agent Skills links in `~/.agents/skills` + MCP config in `~/.cursor/mcp.json`. Does not write `~/.cursor/skills`. Cursor Cloud gets no user-level skills. |
+| mcode | Managed checkout + Agent Skills links in `~/.agents/skills` |
+| vibe | Managed checkout + Agent Skills links in `~/.agents/skills` only — does not copy into `~/.vibe/skills` |
+| devin | Managed checkout + Agent Skills links in `~/.agents/skills` + MCP config in `~/.config/devin/mcp_config.json`. Does not write `~/.config/devin/skills`. |
+| zed | Managed checkout + Agent Skills links in `~/.agents/skills` only. Does not write a Zed-specific skill tree. |
 
 ## Update installed hosts
 
-`--install` records each host it successfully sets up in `~/.local/state/shiori/installed-hosts`. `--update` re-runs the current doctor against those recorded hosts, including capabilities added after the original install. For example, a host installed before MCP support existed receives its MCP config on the next update. Update all recorded hosts without remembering the list:
+`--install` records each host it successfully sets up in `~/.local/state/shiori/installed-hosts`. A named `--update` still re-runs the current doctor against those recorded hosts. A bare `--update` (or `SHIORI_UPDATE=all`) sets up every host the doctor currently detects, including tools that were never recorded. Recorded-but-no-longer-detected hosts are not required. If a detected host cannot be installed, the doctor warns, continues with the rest, and exits non-zero:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | sh -s -- --update
+curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_UPDATE=all sh
 ```
 
 ```powershell
 $env:SHIORI_UPDATE='all'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
 ```
 
-Pass names after `--update`, or use PowerShell `-Update -UpdateTargets opencode,mcode`, to update only selected hosts. A bare `--update` also prints locally detected hosts that were never recorded, so newly installed tools are easy to pick up. Checkout updates are always `git pull --ff-only`; an unexpected origin, dirty checkout, non-repository path, or conflicting skill destination stops the operation rather than deleting user data.
+Pass names after `--install` / `--update`, or use PowerShell `-Install opencode` / `-Update -UpdateTargets opencode,mcode`, to change only selected hosts. A bare run with no `--install` / `--update` stays read-only. Checkout updates are always `git pull --ff-only`; an unexpected origin, dirty checkout, non-repository path, or skills directory symlink leaving `$HOME` stops the operation rather than deleting user data. A second consecutive `--update` with no checkout change reports `already current` and writes nothing. If nothing installable is detected, the doctor prints an error on stderr and writes nothing.
 
 ## Native setup matrix
 
 | Host | Project use | Native reusable installation |
 | --- | --- | --- |
-| OpenCode | Automatic through `.agents/skills` | `--install opencode` uses the managed checkout and global Agent Skills links, and writes MCP config to `~/.config/opencode/opencode.jsonc`. |
-| Codex / ChatGPT desktop | Repository skills work through `.agents/skills` | Run `codex plugin marketplace add Dragonshorn-Studios/shiori-brain`, then open `/plugins` and install **Shiori**. |
-| Claude Code | Automatic through `.claude/skills` and `.claude/agents` | Run `/plugin marketplace add Dragonshorn-Studios/shiori-brain`, then `/plugin install shiori@dragonshorn-brain`. |
-| ZCode | Install the generated plugin | Open **Settings -> Plugins -> Create -> Add marketplace**, enter `Dragonshorn-Studios/shiori-brain`, then install **Shiori**. |
-| Cursor | Automatic through `.cursor/skills` | Open **Settings -> Plugins**, add `https://github.com/Dragonshorn-Studios/shiori-brain`, then install **Shiori**. `--install cursor` writes MCP config only. |
-| MCode / MiniMax Code | Automatic through `.agents/skills` in this checkout | `--install mcode` uses the same managed checkout and global Agent Skills links. |
+| OpenCode | Automatic through `.agents/skills` | `--install opencode` uses the managed checkout and global `~/.agents/skills` links, and writes MCP config to `~/.config/opencode/opencode.jsonc`. |
+| Codex / ChatGPT desktop | Repository skills work through `.agents/skills` | `--install codex` links skills through `~/.agents/skills` and writes MCP via `codex mcp add`. The plugin marketplace remains a separate channel for ChatGPT web (`codex plugin marketplace add Dragonshorn-Studios/shiori-brain`), not owned by the doctor. |
+| Claude Code | Automatic through `.claude/skills` and `.claude/agents` | `--install claude` links skills through `~/.claude/skills` and writes MCP via `claude mcp add -s user`. The plugin marketplace remains a separate channel (`/plugin marketplace add Dragonshorn-Studios/shiori-brain`), not owned by the doctor. |
+| glm-acp-agent | Zed glm-acp-agent reads `~/.claude/skills` | `--install glm` (alias `glm-acp`) links skills through `~/.claude/skills`. Detection is file existence only (`glm-acp-agent` on `PATH` or the npx registry binary under `~/.local/share/zed`); the doctor never runs the binary. Windows support is out of scope. |
+| ZCode | Install the generated plugin | Open **Settings -> Plugins -> Create -> Add marketplace**, enter `Dragonshorn-Studios/shiori-brain`, then install **Shiori**. Do not add `--install zcode`. |
+| Cursor | Automatic through `.cursor/skills` in the repository; local agent also reads `~/.agents/skills` | `--install cursor` writes MCP config and joins the shared `~/.agents/skills` sync. The doctor does not copy files into `~/.cursor/skills`. Cursor Cloud support is out of scope. |
+| MCode / MiniMax Code | Automatic through `.agents/skills` in this checkout | `--install mcode` uses the same managed checkout and global `~/.agents/skills` links. |
 | Windsurf | Automatic through `.windsurf/skills` | Keep the generated project adapter; no marketplace step is required. |
-| Vibe | Automatic through `.vibe/skills` | `--install vibe` uses the same managed checkout and global Agent Skills links. |
-| Devin | Automatic through committed `.devin/skills` in repository sessions | Devin may be cloud-only, so absence of a local executable is not an error. Connect this repository to the Devin workspace. `--install devin` writes user-scope MCP config to `~/.config/devin/mcp_config.json`. |
+| Vibe | Automatic through `.vibe/skills` in the repository; local Vibe also reads `~/.agents/skills` | `--install vibe` uses the same managed checkout and global `~/.agents/skills` links. It does not write `~/.vibe/skills`. |
+| Devin | Automatic through committed `.devin/skills` in repository sessions; local Devin also reads `~/.agents/skills` | `--install devin` writes user-scope MCP config to `~/.config/devin/mcp_config.json` and joins the shared `~/.agents/skills` sync when selected. Devin may be cloud-only, so absence of a local executable is not an error. The doctor does not write `~/.config/devin/skills`. |
+| Zed Agent | Automatic through `~/.agents/skills` | `--install zed` links skills through `~/.agents/skills`. Detected if `zed` is on `PATH`, or `~/.config/zed` / `~/.local/share/zed` exists. Windows support is out of scope. |
 
 ## MCP servers
 

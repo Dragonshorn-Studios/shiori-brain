@@ -8,11 +8,11 @@ Work through unresolved review threads from **maomao** (the team's bot reviewer)
 
 ## Hard rules (never violate)
 1. **Never merge**, close, or change the PR's draft/ready state. You apply comments; humans merge.
-2. **Never post, push, or comment as Szefowa's personal GitHub account.** Use the project's usual coding-agent GitHub identity.
+2. **Never post, push, or comment as Szefowa's personal account.** Use the project's usual coding-agent identity.
 3. **Never put secrets**, tokens, credentials, or `.env` values in comments, commits, or the follow-up issue.
 4. In each working round, **resolve every unresolved maomao thread**, including ones you did not change, each with a short reply.
 5. After three rounds, **do not resolve** remaining threads that are medium or higher.
-6. If `gh` is missing, unauthenticated, or the PR cannot be fetched — stop and report; do not guess.
+6. If the forge CLI or API for this PR/MR is missing, unauthenticated, or the review cannot be fetched — stop and report; do not guess.
 
 ## Severity — what to change
 - **Low, medium, high, or critical:** apply the fix.
@@ -31,9 +31,17 @@ Stop early if a new maomao review has no unresolved threads.
 4. If you changed code, run the project's existing lint, typecheck, and tests. Fix failures before pushing.
 5. Commit (conventional message, no secrets) and `git push` to the PR branch. Never force-push unless the user explicitly asks.
 6. Reply to **every** unresolved maomao thread, then resolve it. If fixed: say what changed and include the commit SHA. If not fixed: say why not (disagreed, out of scope, info skipped, already covered) and still resolve it. Keep replies short. No secrets.
-7. Wait for maomao's next review. Do not start the next working round until it arrives.
+7. Start the wait loop below for maomao's next review. Do not start the next working round until a new review arrives or the 20-minute cap expires.
 
-If this was the third working round, go to **After 3 rounds** instead of starting a fourth.
+After the third working round, still run the wait loop. If a new review arrives, go to **After 3 rounds** instead of starting a fourth. If the cap expires, stop and report as in the wait loop.
+
+## Wait for the next review
+
+After you push and resolve threads, poll the **same forge** that hosts this PR or MR (GitHub, GitLab, Forgejo, or whichever the review came from). Use that forge's own API or CLI and credentials already available to the agent. Never add tokens, never use Szefowa's personal account, and never put secrets in queries or output.
+- Poll every 60–120 seconds for a new maomao review or comments newer than the last push.
+- Cap each wait at 20 minutes.
+- If a new maomao review arrives, apply the existing round rules. It counts toward the maximum of 3 working rounds. After a third working round, go to **After 3 rounds** instead of starting a fourth.
+- If the cap expires with nothing new, stop. Report a short summary that no further maomao review arrived within 20 minutes. Do not merge.
 
 ## After 3 rounds
 
@@ -44,4 +52,4 @@ When the review that follows the third push arrives (or you have completed three
 
 ## Report
 
-After stopping, report: PR, rounds completed, what was applied, threads resolved, the follow-up issue if any, and any remaining medium-or-higher findings left open.
+After stopping, report: PR, rounds completed, what was applied, threads resolved, the follow-up issue if any, any remaining medium-or-higher findings left open, and whether a wait cap expired with no further review.
