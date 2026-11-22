@@ -448,6 +448,7 @@ How -Install and -Update work
   -Verbose          print the status table, recipes, git, and MCP lines.
   -Help             print this usage text.
   Host names may be comma- or space-separated; SHIORI_INSTALL / SHIORI_UPDATE / SHIORI_VERBOSE are the pipe equivalents.
+  MCP: Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs (WSL: /mnt/c). Windows and WSL use <name>-cli mcp --attach 7979.
   Pipe (every detected host first; a bare irm | iex stays read-only):
     curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_INSTALL=all sh
     `$env:SHIORI_INSTALL='all'; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex
@@ -530,7 +531,7 @@ Show-AgentStatus 'Devin' devin '.config/devin' devin -Cloud
 Show-AgentStatus 'Zed' zed '.config/zed' zed
     Write-Host ''
     Write-Host 'MCP servers'
-    Write-Host '  Installed under -Install / -Update for cursor, devin, opencode, claude, and codex. A read-only run does not launch host CLIs.'
+    Write-Host '  Installed under -Install / -Update for cursor, devin, opencode, claude, and codex. Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs (WSL: /mnt/c). Windows and WSL use <name>-cli mcp --attach 7979. A read-only run does not launch host CLIs.'
     Write-DoctorUsage
 }
 
