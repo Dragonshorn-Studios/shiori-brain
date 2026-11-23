@@ -46,3 +46,15 @@
   command: "soundcraft-cli mcp"
   summary: "Digital audio workstation (SoundCraft)"
   when_installed: true
+- name: "designcraft"
+  command: "designcraft-cli mcp"
+  summary: "Product and UI design (DesignCraft)"
+  when_installed: true
+- name: "solidcraft"
+  command: "solidcraft-cli mcp"
+  summary: "3D solid modeling (SolidCraft)"
+  when_installed: true
+- name: "vectorcraft"
+  command: "vectorcraft-cli mcp"
+  summary: "Vector illustration (VectorCraft)"
+  when_installed: true

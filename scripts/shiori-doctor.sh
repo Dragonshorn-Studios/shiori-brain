@@ -15,6 +15,9 @@ managed_claude_skills_file="$state_root/managed-claude-skills"
 skill_link_temp_prefix='.shiori-link-'
 checkout_changed='false'
 skills_changed='false'
+mcp_changed='false'
+mcp_ran='false'
+mcp_output=''
 checkout_line=''
 verbose='false'
 help='false'
@@ -40,7 +43,7 @@ resolve_mcp_helper() {
     printf '%s\n' "$SHIORI_MCP_HELPER"
     return 0
   fi
-  if [ -f 'scripts/shiori-mcp.mjs' ]; then
+  if [ "$context" = checkout ] && [ -f 'scripts/shiori-mcp.mjs' ]; then
     printf '%s\n' 'scripts/shiori-mcp.mjs'
     return 0
   fi
@@ -84,16 +87,109 @@ is_allowed_archive_url() {
   esac
   return 1
 }
+print_mcp_detect_lines() {
+  printf '%s\n' "$1" | while IFS= read -r mcp_line; do
+    [ -n "$mcp_line" ] || continue
+    case $mcp_line in
+      'MCP done') continue ;;
+      'MCP detect not found:'*) printf 'craft:%s\n' "${mcp_line#MCP detect}" ;;
+      'MCP detect '*)
+        rest=${mcp_line#MCP detect }
+        name=${rest%% *}
+        rest=${rest#* }
+        case $rest in
+          found\ *) printf 'craft: %s %s\n' "$name" "$rest" ;;
+        esac
+        ;;
+    esac
+  done
+}
+print_quiet_mcp_reports() {
+  [ "$mcp_ran" = true ] || return 0
+  printf '%s\n' "$mcp_output" | while IFS= read -r mcp_line; do
+    [ -n "$mcp_line" ] || continue
+    case $mcp_line in
+      'MCP done'|'MCP detect '*) continue ;;
+      MCP\ *) ;;
+      *) continue ;;
+    esac
+    rest=${mcp_line#MCP }
+    host=${rest%% *}
+    rest=${rest#* }
+    name=${rest%% *}
+    rest=${rest#* }
+    status=${rest%% *}
+    detail=${rest#"$status"}
+    detail=${detail# }
+    case $status in
+      added|updated|unchanged|conflict|error)
+        if [ -n "$detail" ]; then
+          printf '%s: MCP %s %s %s\n' "$host" "$name" "$status" "$detail"
+        else
+          printf '%s: MCP %s %s\n' "$host" "$name" "$status"
+        fi
+        ;;
+    esac
+  done
+}
 run_mcp_cli() {
-  has_command node || { printf '%s\n' 'Skipping MCP config: node is not available.' >&2; return 0; }
-  helper=$(resolve_mcp_helper) || return 1
+  has_command node || { printf '%s\n' 'Skipping MCP config: node is not available.'; return 0; }
+  mcp_cmd=$1
+  detect_or_list=false
+  if [ "$mcp_cmd" = detect ] || [ "$mcp_cmd" = list ]; then
+    detect_or_list=true
+  fi
+  helper=$(resolve_mcp_helper) || {
+    if [ "$detect_or_list" = true ]; then
+      printf '%s\n' 'Skipping Craft CLI detect: cannot load the Shiori MCP helper.'
+      return 0
+    fi
+    return 1
+  }
   pages_origin=$(archive_url) || pages_origin=''
-  [ -n "$pages_origin" ] || { printf '%s\n' 'Set SHIORI_BRAIN_BASE_URL to the published Pages origin before installing MCP servers. The installer will not fall back to another project archive.' >&2; return 1; }
-  is_allowed_archive_url "$pages_origin" || { printf '%s\n' 'SHIORI_BRAIN_BASE_URL must be an https URL (http is allowed only for localhost).' >&2; return 1; }
-  if [ "$verbose" = true ]; then
-    node "$helper" "$@" --home "$HOME" --checkout "$checkout" --base-url "$pages_origin"
-  else
-    node "$helper" "$@" --home "$HOME" --checkout "$checkout" --base-url "$pages_origin" >/dev/null
+  if [ -n "$pages_origin" ]; then
+    if ! is_allowed_archive_url "$pages_origin"; then
+      if [ "$detect_or_list" = true ]; then
+        pages_origin=''
+      else
+        printf '%s\n' 'SHIORI_BRAIN_BASE_URL must be an https URL (http is allowed only for localhost).' >&2
+        return 1
+      fi
+    fi
+  elif [ "$detect_or_list" != true ]; then
+    printf '%s\n' 'Set SHIORI_BRAIN_BASE_URL to the published Pages origin before installing MCP servers. The installer will not fall back to another project archive.' >&2
+    return 1
+  fi
+  set -- "$@" --home "$HOME" --checkout "$checkout"
+  if [ -n "$pages_origin" ]; then
+    set -- "$@" --base-url "$pages_origin"
+  fi
+  output=$(node "$helper" "$@") || {
+    if [ "$detect_or_list" = true ]; then
+      printf '%s\n' 'Skipping Craft CLI detect: helper failed.'
+      return 0
+    fi
+    return 1
+  }
+  last_line=$(printf '%s\n' "$output" | tail -n 1)
+  if [ "$last_line" != 'MCP done' ]; then
+    if [ "$detect_or_list" = true ]; then
+      printf '%s\n' 'Skipping Craft CLI detect: helper produced no status line.'
+      return 0
+    fi
+    printf '%s\n' 'Shiori MCP helper produced no status line.' >&2
+    return 1
+  fi
+  mcp_ran='true'
+  mcp_output="$mcp_output
+$output"
+  if printf '%s\n' "$output" | grep -qE '^MCP [^[:space:]]+ [^[:space:]]+ (added|updated)([[:space:]]|\(|$)'; then
+    mcp_changed='true'
+  fi
+  if [ "$mcp_cmd" = detect ] || [ "$mcp_cmd" = list ]; then
+    print_mcp_detect_lines "$output"
+  elif [ "$verbose" = true ]; then
+    printf '%s\n' "$output" | sed '/^MCP done$/d'
   fi
 }
 contains_text() {
@@ -340,15 +436,18 @@ print_quiet_destinations() {
   claude_hosts=${claude_hosts# }
   [ -z "$agents_hosts" ] || printf '%s: skills -> ~/.agents/skills\n' "$(comma_hosts $agents_hosts)"
   [ -z "$claude_hosts" ] || printf '%s: skills -> ~/.claude/skills\n' "$(comma_hosts $claude_hosts)"
-  for selected_target in $selected_targets; do
-    case $selected_target in
+  if [ "$mcp_ran" = true ]; then
+    for selected_target in $selected_targets; do
+      case $selected_target in
       opencode) printf 'opencode: MCP -> ~/.config/opencode/opencode.jsonc\n' ;;
       codex) printf 'codex: MCP -> ~/.codex/config.toml\n' ;;
       claude|claude-code) printf 'claude: MCP -> ~/.claude.json\n' ;;
       cursor) printf 'cursor: MCP -> ~/.cursor/mcp.json\n' ;;
       devin) printf 'devin: MCP -> ~/.config/devin/mcp_config.json\n' ;;
-    esac
-  done
+      esac
+    done
+    print_quiet_mcp_reports
+  fi
 }
 print_quiet_report() {
   if [ -z "$checkout_line" ] && [ -d "$checkout/.git" ]; then
@@ -358,9 +457,9 @@ print_quiet_report() {
   list_detected_hosts
   print_host_list detected $detected_list
   print_quiet_destinations
-  if [ "$install_failed" = true ] && [ "$checkout_changed" = false ] && [ "$skills_changed" = false ]; then
+  if [ "$install_failed" = true ] && [ "$checkout_changed" = false ] && [ "$skills_changed" = false ] && [ "$mcp_changed" = false ]; then
     printf 'skipped\n'
-  elif [ "$checkout_changed" = false ] && [ "$skills_changed" = false ]; then
+  elif [ "$checkout_changed" = false ] && [ "$skills_changed" = false ] && [ "$mcp_changed" = false ]; then
     printf 'already current\n'
   else
     printf 'updated\n'
@@ -376,7 +475,7 @@ print_usage() {
     '  --verbose          print the status table, recipes, git, and MCP lines.' \
     '  --help             print this usage text.' \
     '  Host names may be space- or comma-separated; SHIORI_INSTALL / SHIORI_UPDATE / SHIORI_VERBOSE are the pipe equivalents.' \
-    '  MCP: Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs (WSL: /mnt/c). Windows and WSL use <name>-cli mcp --attach 7979.' \
+    '  MCP: Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs, including one nested *Craft* directory (WSL: /mnt/c Program Files; LocalAppData only if SHIORI_CRAFT_LOCALAPPDATA is set). Windows and WSL use <name>-cli mcp --attach 7979. A bare run reports which Craft CLIs were found without writing MCP config.' \
     '  Pipe (every detected host first; a bare curl | sh stays read-only):' \
     '    curl -fsSL https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.sh | SHIORI_INSTALL=all sh' \
     '    $env:SHIORI_INSTALL='\''all'\''; irm https://raw.githubusercontent.com/Dragonshorn-Studios/shiori-brain/main/scripts/shiori-doctor.ps1 | iex' \
@@ -411,7 +510,7 @@ row 'Windsurf' windsurf '.windsurf' local windsurf
 row 'Vibe' vibe '.vibe' local vibe
 row 'Devin' devin '.config/devin' cloud devin
 row 'Zed' zed '.config/zed' local zed
-  printf '%s\n' '' 'MCP servers' '  Installed under --install / --update for cursor, devin, opencode, claude, and codex. Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs (WSL: /mnt/c). Windows and WSL use <name>-cli mcp --attach 7979. A read-only run does not launch host CLIs.'
+  printf '%s\n' '' 'MCP servers' '  Installed under --install / --update for cursor, devin, opencode, claude, and codex. Craft CLIs are found on PATH or in bounded Program Files / LocalAppData *Craft* installs, including one nested *Craft* directory (WSL: /mnt/c Program Files; LocalAppData only if SHIORI_CRAFT_LOCALAPPDATA is set). Windows and WSL use <name>-cli mcp --attach 7979. A bare run reports which Craft CLIs were found without writing MCP config. A read-only run does not launch host CLIs.'
   print_usage
 }
 operation=''
@@ -591,10 +690,13 @@ fi
 if [ "$verbose" = true ]; then
   print_banner
 fi
-if [ -z "$operation" ] && [ "$verbose" != true ]; then
-  list_detected_hosts
-  print_host_list detected $detected_list
-  print_host_list 'not detected' $not_detected
+if [ -z "$operation" ]; then
+  if [ "$verbose" != true ]; then
+    list_detected_hosts
+    print_host_list detected $detected_list
+    print_host_list 'not detected' $not_detected
+  fi
+  run_mcp_cli detect
 fi
 
 if [ -n "$operation" ]; then
@@ -673,7 +775,7 @@ if [ -n "$operation" ]; then
   done
   IFS=$previous_ifs
   if [ "$verbose" = true ]; then
-    if [ "$checkout_changed" = false ] && [ "$skills_changed" = false ]; then
+    if [ "$checkout_changed" = false ] && [ "$skills_changed" = false ] && [ "$mcp_changed" = false ]; then
       printf 'already current\n'
     fi
   else
